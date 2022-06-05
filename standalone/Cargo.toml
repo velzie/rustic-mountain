@@ -1,0 +1,9 @@
+[package]
+name = "rustic-mountain-standalone"
+version = "0.1.0"
+edition = "2021"
+workspace = "../"
+
+default-run = "rustic-mountain-standalone"
+[dependencies]
+rustic-mountain-core = { path = "../core"}

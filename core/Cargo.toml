@@ -1,0 +1,7 @@
+[package]
+name = "rustic-mountain-core"
+version = "0.1.0"
+edition = "2021"
+workspace = "../"
+[dependencies]
+hex = "*"
