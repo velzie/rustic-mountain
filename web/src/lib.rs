@@ -1,6 +1,6 @@
 use rustic_mountain_core::Celeste;
 use wasm_bindgen::prelude::*;
-
+mod test;
 ///...
 /// belive me, i tried
 /// i tried lazy_static, wrapping mutexes in rwlocks in boxes, experimental compiler features, passing closures as JsValues, even more stuff
@@ -22,9 +22,8 @@ pub fn start(map: String, sprites: String, flags: String) {
     unsafe {
         console_error_panic_hook::set_once();
         CELESTE = Box::leak(Box::new(Celeste::new(map, sprites, flags)));
+        (*CELESTE).mem.logger = Box::new(log);
         // (*CELESTE).mem
-
-        (*CELESTE).mem.celeste = Some(CELESTE.as_mut().unwrap());
         // ^ intentionally causes a memory leak so that CELESTE will stay around for the entire time the WASM is loaded in memory. if you have a better way of doing this let me know i guess
         log("initialized celeste");
     }

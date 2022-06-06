@@ -1,5 +1,3 @@
-#![feature(core_intrinsics)]
-
 pub mod memory;
 pub mod objects;
 pub mod structures;
@@ -9,17 +7,17 @@ use std::{cell::RefCell, rc::Rc};
 use memory::Memory;
 use objects::Player;
 use structures::*;
-pub struct Celeste<'a> {
-    pub mem: Memory<'a>,
-    pub objects: Vec<Box<dyn Object>>,
+pub struct Celeste {
+    pub mem: Memory,
+    pub objects: Vec<Rc<RefCell<dyn Object>>>,
     pub got_fruit: u8,
     pub max_djump: u8,
     pub deaths: u8,
     pub frames: u64,
 }
 
-impl<'a> Celeste<'a> {
-    pub fn new(map: String, sprites: String, flags: String) -> Celeste<'a> {
+impl Celeste {
+    pub fn new(map: String, sprites: String, flags: String) -> Celeste {
         let mut cel = Celeste {
             mem: Memory::new(map, sprites, flags),
             objects: vec![],
@@ -29,7 +27,7 @@ impl<'a> Celeste<'a> {
             frames: 0,
         };
 
-        let player = Box::new(Player::init(&mut cel));
+        let player = Rc::new(RefCell::new(Player::init(&mut cel)));
         cel.objects.push(player);
         cel
     }
@@ -43,9 +41,9 @@ impl<'a> Celeste<'a> {
         self.frames += 1;
 
         for i in 0..self.objects.len() {
-            let v = self.objects.get_mut(i).unwrap();
-            // i.update(&self);
-            v.update(&mut self.mem);
+            let v = self.objects[i].clone();
+            v.borrow_mut().do_move();
+            v.borrow_mut().update(self);
         }
         // let graph = &mut rself.borrow_mut().mem.graphics;
         // for i in 0..128 * 128 {
@@ -56,33 +54,29 @@ impl<'a> Celeste<'a> {
         for i in 0..128 * 128 {
             self.mem.graphics[i] = (i % 15) as u8;
         }
+        self.mem.map(0, 0, 0, 0, 16, 16, 4);
         for i in 0..self.objects.len() {
-            let v = self.objects.get_mut(i).unwrap();
-            // i.update(&self);
-            v.draw(&mut self.mem);
+            let v = self.objects[i].clone();
+            v.borrow_mut().draw(self);
         }
-        // really draw shouldn't change state but it could
-        // let rself = RefCell::new(self);
-        // for object in &mut rself.borrow_mut().objects {
-        //     object.draw(*rself.borrow_mut());
-        // }
     }
-
     fn check(
         &mut self,
-        obj: &Box<dyn Object>,
+        object: &Rc<RefCell<dyn Object>>,
         name: &'static str,
         x: f32,
         y: f32,
-    ) -> Option<&mut Box<dyn Object>> {
-        for other in &mut self.objects {
+    ) -> Option<&Rc<RefCell<dyn Object>>> {
+        let obj = object.borrow_mut();
+        for o in &mut self.objects {
+            let other = o.borrow_mut();
             if other.name() == name && *other.collidable() {
                 if other.right() >= obj.left() + x
                     && other.bottom() >= obj.top()
                     && other.left() <= obj.right() + x
                     && other.top() <= obj.bottom() + y
                 {
-                    return Some(other);
+                    return Some(o);
                 }
             }
         }

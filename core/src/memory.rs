@@ -1,7 +1,9 @@
+use std::io;
+
 use crate::Celeste;
 
-pub struct Memory<'a> {
-    pub celeste: Option<&'a mut Celeste<'a>>,
+pub struct Memory {
+    pub logger: Box<dyn Fn(&str)>,
     pub graphics: Vec<u8>,
     pub map: Vec<u8>,
     pub sprites: Vec<u8>,
@@ -9,19 +11,25 @@ pub struct Memory<'a> {
     pub buttons: Vec<bool>,
 }
 
-impl<'a> Memory<'a> {
-    pub fn new(map: String, sprites: String, flags: String) -> Memory<'a> {
+impl Memory {
+    pub fn new(map: String, sprites: String, flags: String) -> Memory {
         let mut graphics = vec![];
         for i in 0..128 * 128 {
             graphics.push((i % 15) as u8);
         }
         Memory {
-            celeste: None,
+            logger: Box::new(|s| println!("{}", s)),
             buttons: vec![false; 5],
             graphics: graphics,
             map: hex::decode(map).unwrap(),
-            sprites: hex::decode(sprites).unwrap(),
-            flags: hex::decode(flags).unwrap(),
+            sprites: sprites
+                .chars()
+                .map(|c| u8::from_str_radix(&format!("{}", c), 16).unwrap())
+                .collect(),
+            flags: flags
+                .chars()
+                .map(|c| u8::from_str_radix(&format!("{}", c), 16).unwrap())
+                .collect(),
         }
     }
     pub fn spr(&mut self, sprite: u8, x: u8, y: u8) {
@@ -29,25 +37,39 @@ impl<'a> Memory<'a> {
         for i in 0..8 {
             for j in 0..8 {
                 self.gset(
-                    self.sprites
-                        [(((sprite % 16) * 8) + (((sprite / 16) * 128) + i + j * 128)) as usize],
-                    x + i,
-                    y + j,
+                    self.sprites[(((sprite as usize % 16) * 8)
+                        + (((sprite as usize / 16) * 8 * 128) + i + (j * 128)))],
+                    x + i as u8,
+                    y + j as u8,
                 );
             }
         }
     }
+    pub fn map(&mut self, celx: u8, cely: u8, sx: u8, sy: u8, celw: u8, celh: u8, mask: u8) {
+        for ioffset in 0..celw {
+            for joffset in 0..celh {
+                let sprnum = self.mget(celx + ioffset, cely + joffset);
+                let flag = self.fget(sprnum);
+                if (flag & mask) == flag {
+                    self.spr(sprnum, (sx + ioffset) * 8, (sy + joffset) * 8);
+                }
+            }
+        }
+    }
     pub fn gset(&mut self, col: u8, x: u8, y: u8) {
-        self.graphics[(x + y * 128) as usize] = col;
+        if x > 128 || y > 128 {
+            panic!("out of range")
+        }
+        self.graphics[x as usize + y as usize * 128] = col;
     }
 
     pub fn mget(&self, x: u8, y: u8) -> u8 {
-        self.map[(x + y * 128) as usize]
+        self.map[x as usize + y as usize * 128]
     }
     pub fn mset(&mut self, x: u8, y: u8, tile: u8) {
-        self.map[(x + y * 128) as usize] = tile
+        self.map[x as usize + y as usize * 128] = tile
     }
-    pub fn fget(&self, x: u8, y: u8) -> u8 {
-        self.flags[(x + y * 128) as usize]
+    pub fn fget(&self, sprnum: u8) -> u8 {
+        self.flags[sprnum as usize]
     }
 }
