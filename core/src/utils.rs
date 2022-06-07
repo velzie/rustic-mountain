@@ -7,25 +7,13 @@ use crate::Celeste;
 // }
 
 pub fn min(v1: f32, v2: f32) -> f32 {
-    if v1 < v2 {
-        v1
-    } else {
-        v2
-    }
+    f32::min(v1, v2)
 }
 pub fn sign(v: f32) -> f32 {
-    if v > 0f32 {
-        1f32
-    } else {
-        0f32
-    }
+    return v.signum();
 }
 pub fn max(v1: f32, v2: f32) -> f32 {
-    if v1 > v2 {
-        v1
-    } else {
-        v2
-    }
+    f32::max(v1, v2)
 }
 pub fn appr(val: f32, target: f32, amount: f32) -> f32 {
     if val > target {

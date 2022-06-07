@@ -8,6 +8,8 @@ pub struct Player {
     pub spr: u8,
     pub hitbox: Rectangle,
     pub collidable: bool,
+    pub p_jump: bool,
+    pub p_dash: bool,
     pub name: &'static str,
 
     pub grace: u8,
@@ -42,6 +44,8 @@ impl Object for Player {
             dash_target_x: 0f32,
             dash_target_y: 0f32,
             spr_off: 0,
+            p_jump: false,
+            p_dash: false,
 
             name: "Player",
             djump: celeste.max_djump,
@@ -55,9 +59,7 @@ impl Object for Player {
         }
     }
     fn update(&mut self, celeste: &mut Celeste) {
-        let h_input = if celeste.mem.buttons[0] && celeste.mem.buttons[1] {
-            0
-        } else if celeste.mem.buttons[0] {
+        let h_input = if celeste.mem.buttons[0] {
             -1
         } else if celeste.mem.buttons[1] {
             1
@@ -65,15 +67,19 @@ impl Object for Player {
             0
         };
 
-        let on_ground = false;
+        let on_ground = self.is_solid(0f32, 2f32, celeste);
 
-        let jump = celeste.mem.buttons[4];
+        let jump = celeste.mem.buttons[4] && !self.p_jump;
+        self.p_jump = celeste.mem.buttons[4];
+        let dash = celeste.mem.buttons[5] && !self.p_dash;
+        self.p_dash = celeste.mem.buttons[5];
+
         if jump {
             self.jbuffer = 4
         } else if self.jbuffer > 0 {
             self.jbuffer -= 1;
         }
-
+        (celeste.mem.logger)(&format!("g: {}", self.grace));
         if on_ground {
             self.grace = 6;
             if self.djump < celeste.max_djump {
@@ -111,10 +117,10 @@ impl Object for Player {
         } else {
             appr(self.spd.x, sign(self.spd.x), decel)
         };
-
         if self.spd.x.abs() < 0.1f32 {
             // self.flip.x
         }
+        // log(self.spd.x);
 
         // if h_input == 0 &&
 
@@ -124,8 +130,11 @@ impl Object for Player {
         //    end
         // y movement
 
-        let maxfall = 2f32;
+        let mut maxfall = 2f32;
 
+        if h_input != 0 && self.is_solid(h_input as f32, 0f32, celeste) {
+            maxfall = 0.4;
+        }
         //    -- wall slide
         //    if h_input~=0 and this.is_solid(h_input,0) and not this.is_ice(h_input,0) then
         //     maxfall=0.4
@@ -139,12 +148,35 @@ impl Object for Player {
             self.spd.y = appr(
                 self.spd.y,
                 maxfall,
-                if self.spd.y.abs() > 0.15f32 {
-                    0.21
-                } else {
-                    0.105
-                },
+                0.21//if self.spd.y.abs() > 0.15f32 {
+                    // 0.21
+                // } else {
+                    // 0.105
+                // },
             )
+        }
+
+        if self.jbuffer > 0 {
+            if self.grace > 1 {
+                self.jbuffer = 0;
+                self.grace = 0;
+                self.spd.y = -2f32;
+            } else {
+                let wall_dir = if self.is_solid(-3f32, 0f32, celeste) {
+                    -1f32
+                } else if self.is_solid(3f32, 3f32, celeste) {
+                    1f32
+                } else {
+                    0f32
+                };
+                self.jbuffer = 0;
+                if wall_dir != 0f32 {
+                    self.spd = Vector {
+                        x: wall_dir * (-1f32 - maxrun),
+                        y: -2f32,
+                    };
+                }
+            }
         }
 
         //    -- jump
@@ -234,15 +266,15 @@ impl Object for Player {
         //   unset_hair_color()
         //  end
         // }
-        if celeste.mem.buttons[2] {
-            self.pos.y -= 1f32;
-        }
-        if celeste.mem.buttons[3] {
-            self.pos.y += 1f32;
-        }
+        // if celeste.mem.buttons[0] {
+        //     self.pos.x -= 1f32;
+        // }
+        // if celeste.mem.buttons[1] {
+        //     self.pos.x += 1f32;
+        // }
     }
     fn draw(&mut self, celeste: &mut Celeste) {
-        self.spr += 1;
+        // self.spr += 1;
         celeste
             .mem
             .spr(self.spr, self.pos.x as u8, self.pos.y as u8);

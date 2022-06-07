@@ -237,6 +237,7 @@ function doupdate() {
 
             then = now - (elapsed % fpsInterval);
             update()
+            draw()
         }
     }
 }
@@ -267,7 +268,7 @@ function draw() {
 
     ctx.putImageData(imageData, 0, 0);
     if (!stop) {
-        window.requestAnimationFrame(draw);
+        // window.requestAnimationFrame(draw);
     }
 }
 function update() {

@@ -62,12 +62,21 @@ pub trait Object {
         // do later
     }
     fn do_move(&mut self, celeste: &mut Celeste) {
+        // self.spd_mut().y = -1f32;
+        self.spd_mut().x *= 2f32;
+        self.spd_mut().y *= 2f32;
+        log!(celeste, self.spd().x);
+
         self.rem_mut().x += self.spd().x;
         let amt = (self.rem().x + 0.5).floor();
         self.rem_mut().x -= amt;
         if true {
             let step = sign(amt);
-            for i in 0..amt.abs() as i32 + 1 {
+            let mut i = 0f32;
+            loop {
+                if i >= amt.abs() {
+                    break;
+                }
                 self.pos_mut().x += step;
                 if self.is_solid(step, 0f32, celeste) {
                     self.pos_mut().x -= step;
@@ -75,6 +84,7 @@ pub trait Object {
                     self.rem_mut().x = 0f32;
                     break;
                 }
+                i += 1f32;
             }
         } else {
             self.pos_mut().x += amt;
@@ -85,14 +95,19 @@ pub trait Object {
         self.rem_mut().y -= amt;
         if true {
             let step = sign(amt);
-            for i in 0..amt.abs() as i32 + 1 {
+            let mut i = 0f32; //start
+            loop {
+                if i >= amt.abs() {
+                    break;
+                }
                 self.pos_mut().y += step;
-                if self.is_solid(step, 0f32, celeste) {
+                if self.is_solid(0f32, step, celeste) {
                     self.pos_mut().y -= step;
                     self.spd_mut().y = 0f32;
                     self.rem_mut().y = 0f32;
                     break;
                 }
+                i += 1f32;
             }
         } else {
             self.pos_mut().x += amt;
@@ -175,7 +190,7 @@ pub trait Object {
     // }
     fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
         // log!(celeste, "d");
-        return self.is_flag(x, y, 8, celeste);
+        return self.is_flag(x, y, 1, celeste);
         // return (y > 0f32
         //     && self.check(celeste, "platform", x, 0f32).is_none()
         //     && self.check(celeste, "platform", x, y).is_some())
@@ -184,24 +199,31 @@ pub trait Object {
         //     || self.check(celeste, "fake_wall", x, y).is_some();
     }
     fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
-        // log!(celeste, max(0f32, (self.left() + x) / 8f32) as i32);
-        // log!(celeste, min(15f32, (self.right() + x) / 8f32) as i32);
+        // log!(celeste, max(0f32, self.left() / 8f32));
+        // log!(
+        //     celeste,
+        //     max(0f32, (self.top() + y) / 8f32) as i32
+        //         - (min(15f32, (self.bottom() + y) / 8f32)) as i32
+        // );
+        // log!(celeste, min(15f32, (self.bottom() + y) / 8f32) as i32);
 
-        for i in (max(0f32, (self.left() + x) / 8f32) as i32)
-            ..(min(15f32, (self.right() + x) / 8f32) as i32) + 1
+        // let mut i = );
+        for i in max(0f32, (self.left() + x) / 8f32) as i32
+            ..(min(15f32, (self.right() + x) / 8f32)) as i32 + 1
         {
             for j in max(0f32, (self.top() + y) / 8f32) as i32
-                ..min(15f32, self.bottom() + y / 8f32) as i32 + 1
+                ..min(15f32, (self.bottom() + y) / 8f32) as i32 + 1
             {
-                let fg = celeste
-                    .mem
-                    .fget_all(celeste.mem.mget((i as f32) as u8, (j as f32) as u8)); //celeste.room.y * 16f32/celeste.room.x * 16f32 +
+                let fg = celeste.mem.fget_all(celeste.mem.mget(
+                    (celeste.room.x as u8 * 16) + i as u8,
+                    (celeste.room.y as u8 * 16) + j as u8,
+                )); //celeste.room.y * 16f32/celeste.room.x * 16f32 +
 
                 // log!(celest)
                 // log!(celeste, celeste.mem.mget(i as u8, j as u8));
                 // log!(celeste, i);
-                log!(celeste, format!("({} {})", i, j));
-                if fg == 3 {
+                // log!(celeste, format!("({} {})", i, j));
+                if (flag & fg) == flag {
                     return true;
                 }
             }
