@@ -25,9 +25,9 @@ pub struct Player {
 }
 
 impl Object for Player {
-    fn init(celeste: &mut Celeste) -> Player {
+    fn init(celeste: &mut Celeste, x: f32, y: f32) -> Player {
         Player {
-            pos: Vector { x: 0f32, y: 0f32 },
+            pos: Vector { x, y },
             rem: Vector { x: 0f32, y: 0f32 },
             spd: Vector { x: 0f32, y: 0f32 },
             spr: 1,
@@ -125,6 +125,7 @@ impl Object for Player {
         // y movement
 
         let maxfall = 2f32;
+
         //    -- wall slide
         //    if h_input~=0 and this.is_solid(h_input,0) and not this.is_ice(h_input,0) then
         //     maxfall=0.4

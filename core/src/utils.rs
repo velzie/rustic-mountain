@@ -2,10 +2,9 @@
 // use pico::Pico;
 use crate::Celeste;
 
-pub fn tile_at(celeste: &Celeste, x: f32, y: f32) -> bool {
-    // return
-    false
-}
+// pub fn tile_at(celeste: &Celeste, x: f32, y: f32) -> bool {
+//     return celeste.mem.mget()
+// }
 
 pub fn min(v1: f32, v2: f32) -> f32 {
     if v1 < v2 {

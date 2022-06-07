@@ -19,17 +19,14 @@ impl Memory {
         }
         Memory {
             logger: Box::new(|s| println!("{}", s)),
-            buttons: vec![false; 5],
+            buttons: vec![false; 6],
             graphics: graphics,
             map: hex::decode(map).unwrap(),
             sprites: sprites
                 .chars()
                 .map(|c| u8::from_str_radix(&format!("{}", c), 16).unwrap())
                 .collect(),
-            flags: flags
-                .chars()
-                .map(|c| u8::from_str_radix(&format!("{}", c), 16).unwrap())
-                .collect(),
+            flags: hex::decode(flags).unwrap(),
         }
     }
     pub fn spr(&mut self, sprite: u8, x: u8, y: u8) {
@@ -49,8 +46,8 @@ impl Memory {
         for ioffset in 0..celw {
             for joffset in 0..celh {
                 let sprnum = self.mget(celx + ioffset, cely + joffset);
-                let flag = self.fget(sprnum);
-                if (flag & mask) == flag {
+                let flag = self.fget_all(sprnum);
+                if (flag & mask) == mask {
                     self.spr(sprnum, (sx + ioffset) * 8, (sy + joffset) * 8);
                 }
             }
@@ -69,7 +66,10 @@ impl Memory {
     pub fn mset(&mut self, x: u8, y: u8, tile: u8) {
         self.map[x as usize + y as usize * 128] = tile
     }
-    pub fn fget(&self, sprnum: u8) -> u8 {
+    pub fn fget(&self, sprnum: u8, idx: u8) -> bool {
+        (self.flags[sprnum as usize] & 2 ^ idx) != 0
+    }
+    pub fn fget_all(&self, sprnum: u8) -> u8 {
         self.flags[sprnum as usize]
     }
 }

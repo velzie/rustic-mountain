@@ -5,3 +5,4 @@ edition = "2021"
 workspace = "../"
 [dependencies]
 hex = "*"
+lazy_static= "*"
