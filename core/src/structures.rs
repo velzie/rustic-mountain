@@ -63,8 +63,6 @@ pub trait Object {
     }
     fn do_move(&mut self, celeste: &mut Celeste) {
         // self.spd_mut().y = -1f32;
-        self.spd_mut().x *= 2f32;
-        self.spd_mut().y *= 2f32;
         log!(celeste, self.spd().x);
 
         self.rem_mut().x += self.spd().x;

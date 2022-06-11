@@ -10,7 +10,11 @@ pub fn min(v1: f32, v2: f32) -> f32 {
     f32::min(v1, v2)
 }
 pub fn sign(v: f32) -> f32 {
-    return v.signum();
+    if v != 0f32 {
+        v.signum()
+    } else {
+        0f32
+    }
 }
 pub fn max(v1: f32, v2: f32) -> f32 {
     f32::max(v1, v2)

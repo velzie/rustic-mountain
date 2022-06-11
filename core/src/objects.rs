@@ -6,6 +6,7 @@ pub struct Player {
     pub spd: Vector,
     pub rem: Vector,
     pub spr: u8,
+    pub flip: Vector,
     pub hitbox: Rectangle,
     pub collidable: bool,
     pub p_jump: bool,
@@ -32,6 +33,7 @@ impl Object for Player {
             pos: Vector { x, y },
             rem: Vector { x: 0f32, y: 0f32 },
             spd: Vector { x: 0f32, y: 0f32 },
+            flip: Vector { x: 1f32, y: 0f32 },
             spr: 1,
             collidable: true,
             grace: 0,
@@ -53,7 +55,7 @@ impl Object for Player {
                 x: 1f32,
                 y: 3f32,
                 w: 6f32,
-                h: 5f32,
+                h: 4f32,
             },
             solids: true,
         }
@@ -67,6 +69,10 @@ impl Object for Player {
             0
         };
 
+        if false || self.pos.y > 128f32 { // spike kill
+             // kill_player(self)
+        }
+
         let on_ground = self.is_solid(0f32, 2f32, celeste);
 
         let jump = celeste.mem.buttons[4] && !self.p_jump;
@@ -79,7 +85,7 @@ impl Object for Player {
         } else if self.jbuffer > 0 {
             self.jbuffer -= 1;
         }
-        (celeste.mem.logger)(&format!("g: {}", self.grace));
+        // (celeste.mem.logger)(&format!("g: {}", self.grace));
         if on_ground {
             self.grace = 6;
             if self.djump < celeste.max_djump {
@@ -100,7 +106,7 @@ impl Object for Player {
         }
 
         let maxrun = 1f32;
-        let decel = 0.1f32;
+        let decel = 0.15f32;
         // replace with on ice
         let accel = if false {
             0.05f32
@@ -115,10 +121,10 @@ impl Object for Player {
         self.spd.x = if self.spd.x.abs() <= maxrun {
             appr(self.spd.x, h_input as f32 * maxrun, accel)
         } else {
-            appr(self.spd.x, sign(self.spd.x), decel)
+            appr(self.spd.x, sign(self.spd.x) * maxrun, decel)
         };
-        if self.spd.x.abs() < 0.1f32 {
-            // self.flip.x
+        if self.spd.x.abs() != 0f32 {
+            self.flip.x = if self.spd.x < 0f32 { 1f32 } else { 0f32 };
         }
         // log(self.spd.x);
 
@@ -148,11 +154,11 @@ impl Object for Player {
             self.spd.y = appr(
                 self.spd.y,
                 maxfall,
-                0.21//if self.spd.y.abs() > 0.15f32 {
-                    // 0.21
-                // } else {
-                    // 0.105
-                // },
+                if self.spd.y.abs() > 0.15f32 {
+                    0.21
+                } else {
+                    0.105
+                },
             )
         }
 
@@ -164,7 +170,7 @@ impl Object for Player {
             } else {
                 let wall_dir = if self.is_solid(-3f32, 0f32, celeste) {
                     -1f32
-                } else if self.is_solid(3f32, 3f32, celeste) {
+                } else if self.is_solid(3f32, 0f32, celeste) {
                     1f32
                 } else {
                     0f32
@@ -203,6 +209,62 @@ impl Object for Player {
         //     end
         //    end
 
+        let d_full = 5f32;
+        let d_half = 3.5355339059;
+        if self.djump > 0 && dash {
+            // (celeste.mem.logger)("??");
+            // init smoke
+            self.djump -= 1;
+            self.dash_time = 4;
+            celeste.has_dashed = true;
+            self.dash_effect_time = 10;
+
+            let v_input = if celeste.mem.buttons[2] {
+                -1
+            } else if celeste.mem.buttons[3] {
+                1
+            } else {
+                0
+            };
+
+            self.spd = Vector {
+                x: if h_input != 0 {
+                    h_input as f32 * (if v_input != 0 { d_half } else { d_full })
+                } else {
+                    if v_input != 0 {
+                        0f32
+                    } else {
+                        // if self.flip.x == -1f32 {
+                        //     -1f32
+                        // } else {
+                        //     1f32
+                        // }
+                        0f32
+                    }
+                },
+                y: if v_input != 0 {
+                    v_input as f32 * if h_input != 0 { d_half } else { d_full }
+                } else {
+                    0f32
+                },
+            };
+
+            self.dash_target_x = 2f32 * sign(self.spd.x);
+            self.dash_target_y =
+                (if self.spd.y >= 0f32 { 2f32 } else { 1.5f32 }) * sign(self.spd.y);
+            self.dash_accel_x = if self.spd.y == 0f32 {
+                1.5f32
+            } else {
+                1.06066017177f32
+            };
+            self.dash_accel_y = if self.spd.x == 0f32 {
+                1.5f32
+            } else {
+                1.06066017177f32
+            };
+            // this.dash_accel_x=this.spd.y==0 and 1.5 or 1.06066017177 -- 1.5 * sqrt()
+            //     this.dash_accel_y=this.spd.x==0 and 1.5 or 1.06066017177
+        }
         //    -- dash
         //    local d_full=5
         //    local d_half=3.5355339059 -- 5 * sqrt(2)
@@ -272,6 +334,7 @@ impl Object for Player {
         // if celeste.mem.buttons[1] {
         //     self.pos.x += 1f32;
         // }
+        // self.
     }
     fn draw(&mut self, celeste: &mut Celeste) {
         // self.spr += 1;
