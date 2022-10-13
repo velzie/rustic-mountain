@@ -17,11 +17,11 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub fn start(map: String, sprites: String, flags: String) {
+pub fn start(map: String, sprites: String, flags: String, fontatlas: String) {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
     unsafe {
         console_error_panic_hook::set_once();
-        CELESTE = Box::leak(Box::new(Celeste::new(map, sprites, flags)));
+        CELESTE = Box::leak(Box::new(Celeste::new(map, sprites, flags, fontatlas)));
         (*CELESTE).mem.logger = Box::new(log);
         // (*CELESTE).mem
         // ^ intentionally causes a memory leak so that CELESTE will stay around for the entire time the WASM is loaded in memory. if you have a better way of doing this let me know i guess

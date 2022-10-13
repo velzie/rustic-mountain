@@ -7,3 +7,4 @@ workspace = "../"
 default-run = "rustic-mountain-standalone"
 [dependencies]
 rustic-mountain-core = { path = "../core"}
+sdl2 = "*"

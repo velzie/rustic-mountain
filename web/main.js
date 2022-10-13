@@ -207,7 +207,7 @@ window.onload = () => {
         if (canvas.getContext) {
             ctx = canvas.getContext("2d")
         }
-        start(mapdata, sprites, flags)
+        start(mapdata, sprites, flags, "")
         window.requestAnimationFrame(doupdate);
         window.requestAnimationFrame(draw);
     })

@@ -61,25 +61,22 @@ pub trait Object {
     fn init_smoke(&self, x: f32, y: f32) {
         // do later
     }
-    fn do_move(&mut self, celeste: &mut Celeste) {
-        // self.spd_mut().y = -1f32;
-        log!(celeste, self.spd().x);
-
-        self.rem_mut().x += self.spd().x;
+    fn do_move(&mut self, celeste: &mut Celeste, ox: f32, oy: f32, start: f32) {
+        self.rem_mut().x += ox;
         let amt = (self.rem().x + 0.5).floor();
         self.rem_mut().x -= amt;
         if true {
             let step = sign(amt);
-            let mut i = 0f32;
+            let mut i = start;
             loop {
-                if i >= amt.abs() {
-                    break;
-                }
                 self.pos_mut().x += step;
                 if self.is_solid(step, 0f32, celeste) {
                     self.pos_mut().x -= step;
                     self.spd_mut().x = 0f32;
                     self.rem_mut().x = 0f32;
+                    break;
+                }
+                if i >= amt.abs() {
                     break;
                 }
                 i += 1f32;
@@ -88,21 +85,21 @@ pub trait Object {
             self.pos_mut().x += amt;
         }
 
-        self.rem_mut().y += self.spd().y;
+        self.rem_mut().y += oy;
         let amt = (self.rem().y + 0.5).floor();
         self.rem_mut().y -= amt;
         if true {
             let step = sign(amt);
             let mut i = 0f32; //start
             loop {
-                if i >= amt.abs() {
-                    break;
-                }
                 self.pos_mut().y += step;
                 if self.is_solid(0f32, step, celeste) {
                     self.pos_mut().y -= step;
                     self.spd_mut().y = 0f32;
                     self.rem_mut().y = 0f32;
+                    break;
+                }
+                if i >= amt.abs() {
                     break;
                 }
                 i += 1f32;

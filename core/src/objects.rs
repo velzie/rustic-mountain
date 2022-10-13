@@ -69,8 +69,17 @@ impl Object for Player {
             0
         };
 
-        if false || self.pos.y > 128f32 { // spike kill
-             // kill_player(self)
+        if celeste.spikes_at(
+            self.left(),
+            self.top(),
+            self.right(),
+            self.bottom(),
+            self.spd.x,
+            self.spd.y,
+        ) || self.pos.y > 128f32
+        {
+            // spike kill
+            celeste.next_room();
         }
 
         let on_ground = self.is_solid(0f32, 2f32, celeste);
@@ -92,10 +101,10 @@ impl Object for Player {
                 self.djump = celeste.max_djump;
             }
         } else if self.grace > 0 {
-            self.grace -= 1
+            self.grace -= 1;
         }
 
-        self.dash_effect_time -= 1;
+        // self.dash_effect_time -= 1;
         if self.dash_time > 0 {
             // init smoke
             self.dash_time -= 1;
@@ -103,113 +112,111 @@ impl Object for Player {
                 x: appr(self.spd.x, self.dash_target_x, self.dash_accel_x),
                 y: appr(self.spd.y, self.dash_target_y, self.dash_accel_y), // do something here idk
             }
-        }
-
-        let maxrun = 1f32;
-        let decel = 0.15f32;
-        // replace with on ice
-        let accel = if false {
-            0.05f32
         } else {
-            if on_ground {
-                0.6
+            let maxrun = 1.0;
+            let decel = 0.15;
+            // replace with on ice
+            let accel = if false {
+                0.05f32
             } else {
-                0.4
+                if on_ground {
+                    0.6
+                } else {
+                    0.4
+                }
+            };
+
+            self.spd.x = if self.spd.x.abs() <= maxrun {
+                appr(self.spd.x, h_input as f32 * maxrun, accel)
+            } else {
+                appr(self.spd.x, sign(self.spd.x) * maxrun, decel)
+            };
+            if self.spd.x.abs() != 0f32 {
+                self.flip.x = if self.spd.x < 0f32 { 1f32 } else { 0f32 };
             }
-        };
+            // log(self.spd.x);
 
-        self.spd.x = if self.spd.x.abs() <= maxrun {
-            appr(self.spd.x, h_input as f32 * maxrun, accel)
-        } else {
-            appr(self.spd.x, sign(self.spd.x) * maxrun, decel)
-        };
-        if self.spd.x.abs() != 0f32 {
-            self.flip.x = if self.spd.x < 0f32 { 1f32 } else { 0f32 };
-        }
-        // log(self.spd.x);
+            // if h_input == 0 &&
 
-        // if h_input == 0 &&
+            //    -- facing direction
+            //    if this.spd.x~=0 then
+            //     this.flip.x=this.spd.x<0
+            //    end
+            // y movement
 
-        //    -- facing direction
-        //    if this.spd.x~=0 then
-        //     this.flip.x=this.spd.x<0
-        //    end
-        // y movement
+            let mut maxfall = 2.0;
 
-        let mut maxfall = 2f32;
+            if h_input != 0 && self.is_solid((h_input * 2) as f32, 0f32, celeste) {
+                maxfall = 0.4;
+            }
+            //    -- wall slide
+            //    if h_input~=0 and this.is_solid(h_input,0) and not this.is_ice(h_input,0) then
+            //     maxfall=0.4
+            //     -- wall slide smoke
+            //     if rnd()<0.2 then
+            //      this.init_smoke(h_input*6)
+            //     end
+            //    end
 
-        if h_input != 0 && self.is_solid(h_input as f32, 0f32, celeste) {
-            maxfall = 0.4;
-        }
-        //    -- wall slide
-        //    if h_input~=0 and this.is_solid(h_input,0) and not this.is_ice(h_input,0) then
-        //     maxfall=0.4
-        //     -- wall slide smoke
-        //     if rnd()<0.2 then
-        //      this.init_smoke(h_input*6)
-        //     end
-        //    end
+            if !on_ground {
+                self.spd.y = appr(
+                    self.spd.y,
+                    maxfall,
+                    if self.spd.y.abs() > 0.15 { 0.21 } else { 0.105 },
+                )
+            }
 
-        if !on_ground {
-            self.spd.y = appr(
-                self.spd.y,
-                maxfall,
-                if self.spd.y.abs() > 0.15f32 {
-                    0.21
+            if self.jbuffer > 0 {
+                if self.grace > 1 {
+                    self.jbuffer = 0;
+                    self.grace = 0;
+                    self.spd.y = -2f32;
                 } else {
-                    0.105
-                },
-            )
-        }
-
-        if self.jbuffer > 0 {
-            if self.grace > 1 {
-                self.jbuffer = 0;
-                self.grace = 0;
-                self.spd.y = -2f32;
-            } else {
-                let wall_dir = if self.is_solid(-3f32, 0f32, celeste) {
-                    -1f32
-                } else if self.is_solid(3f32, 0f32, celeste) {
-                    1f32
-                } else {
-                    0f32
-                };
-                self.jbuffer = 0;
-                if wall_dir != 0f32 {
-                    self.spd = Vector {
-                        x: wall_dir * (-1f32 - maxrun),
-                        y: -2f32,
+                    let wall_dir = if self.is_solid(-3f32, 0f32, celeste) {
+                        -1f32
+                    } else if self.is_solid(3f32, 0f32, celeste) {
+                        1f32
+                    } else {
+                        0f32
                     };
+                    self.jbuffer = 0;
+                    if wall_dir != 0f32 {
+                        self.spd = Vector {
+                            x: wall_dir * (-1f32 - maxrun),
+                            y: -2f32,
+                        };
+                    }
                 }
             }
+
+            //    -- jump
+            //    if this.jbuffer>0 then
+            //     if this.grace>0 then
+            //      -- normal jump
+            //      psfx"1"
+            //      this.jbuffer=0
+            //      this.grace=0
+            //      this.spd.y=-2
+            //      this.init_smoke(0,4)
+            //     else
+            //      -- wall jump
+            //      local wall_dir=(this.is_solid(-3,0) and -1 or this.is_solid(3,0) and 1 or 0)
+            //      if wall_dir~=0 then
+            //       psfx"2"
+            //       this.jbuffer=0
+            //       this.spd=vector(wall_dir*(-1-maxrun),-2)
+            //       if not this.is_ice(wall_dir*3,0) then
+            //        -- wall jump smoke
+            //        this.init_smoke(wall_dir*6)
+            //       end
+            //      end
+            //     end
+            //    end
+            if self.pos.y <= 4.0 {
+                celeste.next_room();
+            }
         }
-
-        //    -- jump
-        //    if this.jbuffer>0 then
-        //     if this.grace>0 then
-        //      -- normal jump
-        //      psfx"1"
-        //      this.jbuffer=0
-        //      this.grace=0
-        //      this.spd.y=-2
-        //      this.init_smoke(0,4)
-        //     else
-        //      -- wall jump
-        //      local wall_dir=(this.is_solid(-3,0) and -1 or this.is_solid(3,0) and 1 or 0)
-        //      if wall_dir~=0 then
-        //       psfx"2"
-        //       this.jbuffer=0
-        //       this.spd=vector(wall_dir*(-1-maxrun),-2)
-        //       if not this.is_ice(wall_dir*3,0) then
-        //        -- wall jump smoke
-        //        this.init_smoke(wall_dir*6)
-        //       end
-        //      end
-        //     end
-        //    end
-
-        let d_full = 5f32;
+        let d_full = 5.0;
         let d_half = 3.5355339059;
         if self.djump > 0 && dash {
             // (celeste.mem.logger)("??");
@@ -250,15 +257,14 @@ impl Object for Player {
             };
 
             self.dash_target_x = 2f32 * sign(self.spd.x);
-            self.dash_target_y =
-                (if self.spd.y >= 0f32 { 2f32 } else { 1.5f32 }) * sign(self.spd.y);
+            self.dash_target_y = (if self.spd.y >= 0f32 { 2.0 } else { 1.5 }) * sign(self.spd.y);
             self.dash_accel_x = if self.spd.y == 0f32 {
-                1.5f32
+                1.5
             } else {
                 1.06066017177f32
             };
             self.dash_accel_y = if self.spd.x == 0f32 {
-                1.5f32
+                1.5
             } else {
                 1.06066017177f32
             };
@@ -334,7 +340,7 @@ impl Object for Player {
         // if celeste.mem.buttons[1] {
         //     self.pos.x += 1f32;
         // }
-        // self.
+        // self
     }
     fn draw(&mut self, celeste: &mut Celeste) {
         // self.spr += 1;
