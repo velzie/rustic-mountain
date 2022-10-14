@@ -7,6 +7,8 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use std::time::Duration;
 
+static SCALE: u8 = 5;
+
 pub fn main() {
     let mut engine = Celeste::new(
         consts::MAPDATA.into(),
@@ -42,7 +44,7 @@ pub fn main() {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("rust-sdl2 demo", 128, 128)
+        .window("rustic-mountain", 128 * SCALE as u32, 128 * SCALE as u32)
         .position_centered()
         .build()
         .unwrap();
@@ -54,8 +56,8 @@ pub fn main() {
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
-        canvas.set_draw_color(Color::BLUE);
-        canvas.clear();
+        // canvas.set_draw_color(Color::BLUE);
+        // canvas.clear();
 
         for event in event_pump.poll_iter() {
             match event {
@@ -118,7 +120,12 @@ pub fn main() {
         for (i, col) in engine.mem.graphics.iter().enumerate() {
             canvas.set_draw_color(pallete[*col as usize]);
             canvas
-                .draw_point(sdl2::rect::Point::new((i % 128) as i32, (i / 128) as i32))
+                .fill_rect(sdl2::rect::Rect::new(
+                    (i % 128 * SCALE as usize) as i32,
+                    (i / 128 * SCALE as usize) as i32,
+                    SCALE as u32,
+                    SCALE as u32,
+                ))
                 .unwrap();
         }
         canvas.present();

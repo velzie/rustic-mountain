@@ -26,3 +26,6 @@ pub fn appr(val: f32, target: f32, amount: f32) -> f32 {
         min(val + amount, target)
     }
 }
+pub fn mid(v1: f32, v2: f32, v3: f32) -> f32 {
+    return v1.max(v2).min(v3);
+}
