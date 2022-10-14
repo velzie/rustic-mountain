@@ -9,7 +9,7 @@ pub mod utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use memory::Memory;
-use objects::Player;
+use objects::{Player, Balloon, Spring};
 use structures::*;
 
 use rand::prelude::*;
@@ -91,13 +91,13 @@ impl Celeste {
             let v = self.objects[i].clone();
 
             let obj = v.borrow_mut();
-            // let spd = Vector {
-            //     x: obj.spd().x,
-            //     y: obj.spd().y,
-            // };
+            let spd = Vector {
+                x: obj.spd.x,
+                y: obj.spd.y,
+            };
             drop(obj);
-            // v.borrow_mut().do_move(self, spd.x, spd.y, 0f32);
-            // v.borrow_mut().update(self);
+            v.borrow_mut().do_move(self, spd.x, spd.y, 0f32);
+            v.borrow_mut().update(self);
         }
 
         // let graph = &mut rself.borrow_mut().mem.graphics;
@@ -176,7 +176,7 @@ impl Celeste {
     }
     fn next_room(&mut self) {
         // do sound at some point
-        self.level += 1;
+        self.level += 2;
         self.load_room(self.level % 8, self.level / 8);
     }
     fn load_room(&mut self, x: u8, y: u8) {
@@ -190,11 +190,12 @@ impl Celeste {
         for i in 0..15 {
             for j in 0..15 {
                 let tile = self.mem.mget(x * 16 + i, y * 16 + j);
-                (self.mem.logger)(&format!("{}", tile));
+                let x = i as f32 * 8.0;
+                let y =  j as f32 * 8.0;
                 match match tile {
-                    1 => Some(Player::init(self, i as f32 * 8.0, j as f32 * 8.0)),
-
-                    // 22 => Some
+                    1 => Some(Player::init(self, x,y)),
+                    22 => Some(Balloon::init(self, x, y)),
+                    18=> Some(Spring::init(self, x, y)),
                     _ => None,
                 } {
                     Some(o) => {

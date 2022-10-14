@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 // #[macro_use]
 
-use crate::{memory::Memory, objects::Player, utils::*, Celeste};
+use crate::{memory::Memory, objects::{Player, Balloon, BaseObject, Spring, FallFloor}, utils::*, Celeste};
 
 // use crate::utils::log;
 
@@ -42,6 +42,7 @@ pub struct Object {
     pub obj_type: ObjectType,
     pub draw: fn(&mut Object,&mut Celeste),
     pub update: fn(&mut Object,&mut Celeste),
+    pub name: &'static str,
 }
 impl Object{
     pub fn draw(&mut self,celeste:&mut Celeste){
@@ -50,24 +51,24 @@ impl Object{
     pub fn update(&mut self,celeste:&mut Celeste){
         (self.update)(self,celeste);
     }
-    fn left(&self) -> f32 {
+    pub fn left(&self) -> f32 {
         self.pos.x + self.hitbox.x
     }
-    fn right(&self) -> f32 {
+    pub fn right(&self) -> f32 {
         self.left() + self.hitbox.w - 1f32
     }
-    fn top(&self) -> f32 {
+    pub fn top(&self) -> f32 {
         self.pos.y + self.hitbox.y
     }
-    fn bottom(&self) -> f32 {
+    pub fn bottom(&self) -> f32 {
         self.top() + self.hitbox.h - 1f32
     }
 
-    fn init_smoke(&self,x:f32,y:f32){
+    pub fn init_smoke(&self,x:f32,y:f32){
 
     }
 
-    fn draw_sprite(&self, celeste: &mut Celeste) {
+    pub fn draw_sprite(&self, celeste: &mut Celeste) {
         celeste.mem.spr(
             self.spr,
             self.pos.x as i32,
@@ -76,7 +77,7 @@ impl Object{
         )
     }
     
-    fn do_move(&mut self, celeste: &mut Celeste, ox: f32, oy: f32, start: f32) {
+    pub fn do_move(&mut self, celeste: &mut Celeste, ox: f32, oy: f32, start: f32) {
         self.rem.x += ox;
         let amt = (self.rem.x + 0.5).floor();
         self.rem.x -= amt;
@@ -123,7 +124,7 @@ impl Object{
             self.pos.x += amt;
         }
     }
-    fn check(
+    pub fn check(
         &mut self,
         celeste: &mut Celeste,
         name: &'static str,
@@ -134,13 +135,13 @@ impl Object{
         for i in 0..celeste.objects.len() {
             match celeste.objects[i].try_borrow() {
                 Ok(other) => {
-                    if std::mem::discriminant(&other.obj_type) == std::mem::discriminant(&obj.obj_type) && other.collidable {
+                    if other.name == name && other.collidable {
                         if other.right() >= obj.left() + x
                             && other.bottom() >= obj.top()
                             && other.left() <= obj.right() + x
                             && other.top() <= obj.bottom() + y
                         {
-                            return Some(i);
+                            return Some(i)
                         }
                     }
                 }
@@ -149,17 +150,17 @@ impl Object{
         }
         None
     }
-    fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
+    pub fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
         // log!(celeste, "d");
-        return self.is_flag(x, y, 1, celeste);
-        // return (y > 0f32
-        //     && self.check(celeste, "platform", x, 0f32).is_none()
-        //     && self.check(celeste, "platform", x, y).is_some())
-        //     || self.is_flag(x, y, 0, celeste)
-        //     || self.check(celeste, "fall_floor", x, y).is_some()
-        //     || self.check(celeste, "fake_wall", x, y).is_some();
+        // return self.is_flag(x, y, 1, celeste);
+        return (y > 0f32
+            && self.check(celeste, "Platform", x, 0f32).is_none()
+            && self.check(celeste, "Platform", x, y).is_some())
+            || self.is_flag(x, y, 1, celeste)
+            || self.check(celeste, "FallFloor", x, y).is_some()
+            || self.check(celeste, "FakeWall", x, y).is_some();
     }
-    fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
+    pub fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
 
         for i in max(0f32, (self.left() + x + 1.0) / 8f32) as i32
             ..(min(15f32, (self.right() + x - 1.0) / 8f32)) as i32 + 1
@@ -180,7 +181,11 @@ impl Object{
     }
 }
 pub enum ObjectType {
-    Player(Player),
+    Player(Rc<RefCell<Player>>),
+    Balloon(Rc<RefCell<Balloon>>),
+    Spring(Rc<RefCell<Spring>>),
+    FallFloor(Rc<RefCell<FallFloor>>),
+    BaseObject(Rc<RefCell<BaseObject>>)
 }
 // pub trait Object {
 //     fn pos(&self) -> &Vector;
