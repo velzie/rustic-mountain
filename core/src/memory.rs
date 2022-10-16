@@ -1,7 +1,7 @@
 use std::io;
 
 use crate::{
-    structures::FlipState,
+    structures::{FlipState, Vector},
     utils::{max, mid, min},
     Celeste,
 };
@@ -15,6 +15,7 @@ pub struct Memory {
     pub flags: Vec<u8>,
     pub buttons: Vec<bool>,
     pub pallete: Vec<ColorState>,
+    pub camera: Vector,
 
     pub rng: ThreadRng,
 }
@@ -51,6 +52,7 @@ impl Memory {
             flags: hex::decode(flags).unwrap(),
             pallete: pal,
             rng: thread_rng(),
+            camera: Vector { x: 0.0, y: 0.0 },
         }
     }
     pub fn spr(&mut self, sprite: u8, x: i32, y: i32, flip: Option<FlipState>) {
@@ -71,12 +73,12 @@ impl Memory {
                     .clone();
 
                 if !color.transparent {
-                    self.gset(color.color, (x + i as i32) as u8, (y + j as i32) as u8);
+                    self.pset(color.color, x + i as i32, y + j as i32);
                 }
             }
         }
     }
-    pub fn map(&mut self, celx: u8, cely: u8, sx: u8, sy: u8, celw: u8, celh: u8, mask: u8) {
+    pub fn map(&mut self, celx: u8, cely: u8, sx: i32, sy: i32, celw: u8, celh: u8, mask: u8) {
         for ioffset in 0..celw {
             for joffset in 0..celh {
                 let sprnum = self.mget(celx + ioffset, cely + joffset);
@@ -87,8 +89,8 @@ impl Memory {
                     // }
                     self.spr(
                         sprnum,
-                        ((sx + ioffset) * 8) as i32,
-                        ((sy + joffset) * 8) as i32,
+                        (sx + ioffset as i32) * 8,
+                        (sy + joffset as i32) * 8,
                         None,
                     );
                 }
@@ -178,32 +180,29 @@ impl Memory {
             c,
         );
     }
-    pub fn rrectfill(&mut self, x: u8, y: u8, x1: u8, y1: u8, col: u8) {
-        let mut i = x as i8;
+    pub fn rrectfill(&mut self, x: i32, y: i32, x1: i32, y1: i32, col: u8) {
+        let mut i = x;
         loop {
-            let mut j = y as i8;
+            let mut j = y;
             loop {
-                self.gset(col, i as u8, j as u8);
-                j += (y1 as i8 - y as i8).signum();
-                if j == y1 as i8 {
+                self.pset(col, i, j);
+                j += (y1 - y).signum();
+                if j == y1 {
                     break;
                 }
             }
-            i += (x1 as i8 - x as i8).signum();
-            if i == x1 as i8 {
+            i += (x1 - x).signum();
+            if i == x1 {
                 break;
             }
         }
     }
+    pub fn camera(&mut self, x: f32, y: f32) {
+        self.camera = Vector { x, y };
+    }
     pub fn rectfill(&mut self, x: i32, y: i32, x2: i32, y2: i32, c: u8) {
         if x < 128 && x2 > 0 && y < 128 && y2 > 0 {
-            self.rrectfill(
-                0.max(x) as u8,
-                0.max(y) as u8,
-                x2.min(127) as u8,
-                y2.min(127) as u8,
-                c,
-            );
+            self.rrectfill(0.max(x), 0.max(y), x2.min(127), y2.min(127), c);
         }
     }
 
@@ -222,9 +221,10 @@ impl Memory {
             }
         }
     }
-    pub fn gset(&mut self, col: u8, x: u8, y: u8) {
-        if x >= 128 || y >= 128 {
-            // print!("out of range");
+    pub fn pset(&mut self, col: u8, mut x: i32, mut y: i32) {
+        x += self.camera.x as i32;
+        y += self.camera.y as i32;
+        if x < 0 || y < 0 || x >= 128 || y >= 128 {
             return;
         }
         self.graphics[x as usize + y as usize * 128] = col;

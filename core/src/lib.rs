@@ -9,7 +9,9 @@ pub mod utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use memory::Memory;
-use objects::{Balloon, FallFloor, Platform, Player, Spring};
+use objects::{
+    balloon::Balloon, fallfloor::FallFloor, platform::Platform, player::Player, spring::Spring, playerspawn::PlayerSpawn,
+};
 use structures::*;
 
 use rand::prelude::*;
@@ -28,6 +30,7 @@ pub struct Celeste {
     pub freeze: u8,
     pub particles: Vec<Particle>,
     pub delay_restart: u8,
+    pub shake: u8,
     clouds: Vec<Cloud>,
 }
 
@@ -74,6 +77,7 @@ impl Celeste {
             clouds,
             particles,
             delay_restart: 0,
+            shake: 0,
         };
         cel.load_room(0, 0);
         cel
@@ -85,6 +89,17 @@ impl Celeste {
         if self.freeze > 0 {
             self.freeze -= 1;
             return;
+        }
+
+        if self.shake > 0 {
+            self.shake -= 1;
+            self.mem.camera(0.0, 0.0);
+            if self.shake != 0 {
+                self.mem.camera = Vector {
+                    x: self.mem.rng.gen_range(-2.0..3.0),
+                    y: self.mem.rng.gen_range(-2.0..3.0),
+                }
+            }
         }
 
         if self.delay_restart > 0 {
@@ -159,7 +174,7 @@ impl Celeste {
             0,
             16,
             16,
-            0, //2
+            2, //2
         );
         for i in 0..self.objects.len() {
             let v = self.objects[i].clone();
@@ -203,7 +218,7 @@ impl Celeste {
                 let x = i as f32 * 8.0;
                 let y = j as f32 * 8.0;
                 match match tile {
-                    1 => Some(Player::init(self, x, y)),
+                    1 => Some(PlayerSpawn::init(self, x, y)),
                     11 | 12 => Some(Platform::init(self, x, y, tile)),
                     22 => Some(Balloon::init(self, x, y)),
                     18 => Some(Spring::init(self, x, y)),

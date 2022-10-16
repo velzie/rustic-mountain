@@ -4,7 +4,10 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     memory::Memory,
-    objects::{Balloon, BaseObject, FallFloor, Platform, Player, Spring},
+    objects::{
+        balloon::Balloon, fallfloor::FallFloor, platform::Platform, player::Player,
+        playerspawn::PlayerSpawn, spring::Spring,
+    },
     utils::*,
     Celeste,
 };
@@ -222,11 +225,11 @@ impl Object {
 }
 pub enum ObjectType {
     Player(Rc<RefCell<Player>>),
+    PlayerSpawn(Rc<RefCell<PlayerSpawn>>),
     Balloon(Rc<RefCell<Balloon>>),
     Spring(Rc<RefCell<Spring>>),
     FallFloor(Rc<RefCell<FallFloor>>),
     Platform(Rc<RefCell<Platform>>),
-    BaseObject(Rc<RefCell<BaseObject>>),
 }
 // pub trait Object {
 //     fn pos(&self) -> &Vector;
