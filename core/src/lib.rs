@@ -9,7 +9,7 @@ pub mod utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use memory::Memory;
-use objects::{Player, Balloon, Spring};
+use objects::{Balloon, FallFloor, Platform, Player, Spring};
 use structures::*;
 
 use rand::prelude::*;
@@ -27,6 +27,7 @@ pub struct Celeste {
     pub has_key: bool,
     pub freeze: u8,
     pub particles: Vec<Particle>,
+    pub delay_restart: u8,
     clouds: Vec<Cloud>,
 }
 
@@ -72,8 +73,9 @@ impl Celeste {
             freeze: 0,
             clouds,
             particles,
+            delay_restart: 0,
         };
-        cel.next_room();
+        cel.load_room(0, 0);
         cel
     }
     // pub fn load_level();
@@ -82,6 +84,14 @@ impl Celeste {
 
         if self.freeze > 0 {
             self.freeze -= 1;
+            return;
+        }
+
+        if self.delay_restart > 0 {
+            self.delay_restart -= 1;
+            if self.delay_restart == 0 {
+                self.load_room(self.room.x as u8, self.room.y as u8);
+            }
         }
 
         for i in 0..self.objects.len() {
@@ -149,7 +159,7 @@ impl Celeste {
             0,
             16,
             16,
-            2,
+            0, //2
         );
         for i in 0..self.objects.len() {
             let v = self.objects[i].clone();
@@ -174,9 +184,9 @@ impl Celeste {
             }
         }
     }
-    fn next_room(&mut self) {
+    pub fn next_room(&mut self) {
         // do sound at some point
-        self.level += 2;
+        self.level += 1;
         self.load_room(self.level % 8, self.level / 8);
     }
     fn load_room(&mut self, x: u8, y: u8) {
@@ -187,15 +197,17 @@ impl Celeste {
             y: y as f32,
         };
 
-        for i in 0..15 {
-            for j in 0..15 {
+        for i in 0..16 {
+            for j in 0..16 {
                 let tile = self.mem.mget(x * 16 + i, y * 16 + j);
                 let x = i as f32 * 8.0;
-                let y =  j as f32 * 8.0;
+                let y = j as f32 * 8.0;
                 match match tile {
-                    1 => Some(Player::init(self, x,y)),
+                    1 => Some(Player::init(self, x, y)),
+                    11 | 12 => Some(Platform::init(self, x, y, tile)),
                     22 => Some(Balloon::init(self, x, y)),
-                    18=> Some(Spring::init(self, x, y)),
+                    18 => Some(Spring::init(self, x, y)),
+                    23 => Some(FallFloor::init(self, x, y)),
                     _ => None,
                 } {
                     Some(o) => {
@@ -208,18 +220,18 @@ impl Celeste {
             }
         }
     }
-    pub fn tile_at(&self, x: u8, y: u8) -> u8 {
-        return self
-            .mem
-            .mget(self.room.x as u8 * 16 + x, self.room.y as u8 * 16 + y);
+    pub fn tile_at(&self, x: f32, y: f32) -> u8 {
+        return self.mem.mget(
+            (self.room.x as f32 * 16.0 + x) as u8,
+            (self.room.y as f32 * 16.0 + y) as u8,
+        );
     }
     pub fn spikes_at(&self, x1: f32, y1: f32, x2: f32, y2: f32, xspd: f32, yspd: f32) -> bool {
-        let mut i = utils::max(0f32, x1 / 8f32);
+        let mut i = 0f32.max(x1 / 8.0) as u8;
         loop {
-            let mut j = utils::max(0f32, y1 / 8f32);
-
+            let mut j = 0f32.max(y1 / 8.0) as u8;
             loop {
-                if match self.tile_at(i as u8, j as u8) {
+                if match self.tile_at(i as f32, j as f32) {
                     17 => yspd >= 0.0 && y2 % 8.0 >= 6.0,
                     27 => yspd <= 0.0 && y1 % 8.0 <= 2.0,
                     43 => xspd <= 0.0 && x1 % 8.0 <= 2.0,
@@ -228,15 +240,16 @@ impl Celeste {
                 } {
                     return true;
                 }
-                j += 1f32;
-                if j > utils::min(15f32, y2 / 8f32) {
+                if j >= 15f32.min(y2 / 8.0) as u8 {
                     break;
                 }
+                j += 1;
             }
-            i += 1f32;
-            if i > utils::min(15f32, x2 / 8f32) + 1.0 {
+            // dbg!(utils::min(15f32, x2 / 8f32));
+            if i >= utils::min(15f32, x2 / 8f32) as u8 {
                 break;
             }
+            i += 1;
         }
         return false;
     }

@@ -108,6 +108,9 @@ pub fn main() {
                     Keycode::X => {
                         engine.mem.buttons[5] = false;
                     }
+                    Keycode::F => {
+                        engine.next_room();
+                    }
                     _ => {}
                 },
                 _ => {}

@@ -82,6 +82,9 @@ impl Memory {
                 let sprnum = self.mget(celx + ioffset, cely + joffset);
                 let flag = self.fget_all(sprnum);
                 if (flag & mask) == mask {
+                    // if sprnum == 11 || sprnum == 12 {
+                    //     dbg!((celx + ioffset, cely + joffset));
+                    // }
                     self.spr(
                         sprnum,
                         ((sx + ioffset) * 8) as i32,
@@ -232,7 +235,7 @@ impl Memory {
         if ind < 4096 {
             self.map[ind]
         } else {
-            // after 4096 bytes, we start reading from the shared memory section at the bottom of sprites
+            // after the 4096th octet, we start reading from the shared memory section at the bottom of sprites
             // meaning we convert from 2 16s to 1 256
             let start = (ind - 4096) * 2 + 4096 * 2;
 
@@ -244,7 +247,10 @@ impl Memory {
         if ind < 4096 {
             self.map[ind] = tile;
         } else {
-            self.sprites[ind] = tile;
+            let start = (ind - 4096) * 2 + 4096 * 2;
+
+            self.sprites[start] = tile % 16;
+            self.sprites[start + 1] = tile / 16;
         }
     }
     pub fn fget(&self, sprnum: u8, idx: u8) -> bool {

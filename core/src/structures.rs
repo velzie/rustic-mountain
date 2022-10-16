@@ -2,7 +2,12 @@ use std::{cell::RefCell, rc::Rc};
 
 // #[macro_use]
 
-use crate::{memory::Memory, objects::{Player, Balloon, BaseObject, Spring, FallFloor}, utils::*, Celeste};
+use crate::{
+    memory::Memory,
+    objects::{Balloon, BaseObject, FallFloor, Platform, Player, Spring},
+    utils::*,
+    Celeste,
+};
 
 // use crate::utils::log;
 
@@ -12,7 +17,7 @@ macro_rules! log {
     };
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Vector {
     pub x: f32,
     pub y: f32,
@@ -32,24 +37,24 @@ pub struct Object {
     pub pos: Vector,
     pub spd: Vector,
     pub rem: Vector,
-    pub spr:u8,
+    pub spr: u8,
     pub hitbox: Rectangle,
     pub flip: FlipState,
 
     pub collidable: bool,
-
+    pub solids: bool,
 
     pub obj_type: ObjectType,
-    pub draw: fn(&mut Object,&mut Celeste),
-    pub update: fn(&mut Object,&mut Celeste),
+    pub draw: fn(&mut Object, &mut Celeste),
+    pub update: fn(&mut Object, &mut Celeste),
     pub name: &'static str,
 }
-impl Object{
-    pub fn draw(&mut self,celeste:&mut Celeste){
-        (self.draw)(self,celeste);
+impl Object {
+    pub fn draw(&mut self, celeste: &mut Celeste) {
+        (self.draw)(self, celeste);
     }
-    pub fn update(&mut self,celeste:&mut Celeste){
-        (self.update)(self,celeste);
+    pub fn update(&mut self, celeste: &mut Celeste) {
+        (self.update)(self, celeste);
     }
     pub fn left(&self) -> f32 {
         self.pos.x + self.hitbox.x
@@ -64,9 +69,7 @@ impl Object{
         self.top() + self.hitbox.h - 1f32
     }
 
-    pub fn init_smoke(&self,x:f32,y:f32){
-
-    }
+    pub fn init_smoke(&self, x: f32, y: f32) {}
 
     pub fn draw_sprite(&self, celeste: &mut Celeste) {
         celeste.mem.spr(
@@ -76,17 +79,17 @@ impl Object{
             Some(self.flip.clone()),
         )
     }
-    
+
     pub fn do_move(&mut self, celeste: &mut Celeste, ox: f32, oy: f32, start: f32) {
         self.rem.x += ox;
         let amt = (self.rem.x + 0.5).floor();
         self.rem.x -= amt;
-        if true {
+        if self.solids {
             let step = sign(amt);
             let mut i = start;
             loop {
                 self.pos.x += step;
-                if self.is_solid(step, 0f32, celeste) {
+                if self.is_solid(0f32, 0f32, celeste) {
                     self.pos.x -= step;
                     self.spd.x = 0f32;
                     self.rem.x = 0f32;
@@ -109,7 +112,7 @@ impl Object{
             let mut i = 0f32; //start
             loop {
                 self.pos.y += step;
-                if self.is_solid(0f32, step, celeste) {
+                if self.is_solid(0f32, 0f32, celeste) {
                     self.pos.y -= step;
                     self.spd.y = 0f32;
                     self.rem.y = 0f32;
@@ -137,11 +140,11 @@ impl Object{
                 Ok(other) => {
                     if other.name == name && other.collidable {
                         if other.right() >= obj.left() + x
-                            && other.bottom() >= obj.top()
+                            && other.bottom() >= obj.top() + y
                             && other.left() <= obj.right() + x
                             && other.top() <= obj.bottom() + y
                         {
-                            return Some(i)
+                            return Some(i);
                         }
                     }
                 }
@@ -161,12 +164,11 @@ impl Object{
             || self.check(celeste, "FakeWall", x, y).is_some();
     }
     pub fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
-
-        for i in max(0f32, (self.left() + x + 1.0) / 8f32) as i32
-            ..(min(15f32, (self.right() + x - 1.0) / 8f32)) as i32 + 1
+        for i in max(0f32, (self.left() + x) / 8f32) as i32
+            ..(min(15f32, (self.right() + x) / 8f32)) as i32 + 1
         {
-            for j in max(0f32, (self.top() + y + 1.0) / 8f32) as i32
-                ..min(15f32, (self.bottom() + y - 1.0) / 8f32) as i32 + 1
+            for j in max(0f32, (self.top() + y) / 8f32) as i32
+                ..min(15f32, (self.bottom() + y) / 8f32) as i32 + 1
             {
                 let fg = celeste.mem.fget_all(celeste.mem.mget(
                     (celeste.room.x as u8 * 16) + i as u8,
@@ -178,6 +180,44 @@ impl Object{
             }
         }
         false
+
+        // let mut i = 15f32.min((self.right() + x) / 8.0);
+        // dbg!(&i);
+        // loop {
+        //     let mut j = 0f32.max((self.top() + y) / 8.0);
+        //     loop {
+        //         let fg = celeste.mem.fget_all(celeste.mem.mget(
+        //             ((celeste.room.x * 16.0) + i) as u8,
+        //             ((celeste.room.y * 16.0) + j) as u8,
+        //         ));
+        //         if (flag & fg) == flag {
+        //             return true;
+        //         }
+        //         j += 1.0;
+        //         if j >= 15f32.min((self.bottom() + y) / 8.0) {
+        //             break;
+        //         }
+        //     }
+        //     dbg!(0f32.max((self.left() + x) / 8.0));
+        //     i += 1.0;
+        //     if i >= 0f32.max((self.right() + x) / 8.0) {
+        //         break;
+        //     }
+        // }
+        // false
+    }
+
+    /// WARNING: Only use this function if it is being called by the object itself in an update loop
+    pub fn destroy_self(&mut self, celeste: &mut Celeste) {
+        celeste.objects.retain(|o| o.try_borrow().is_ok());
+        // this particular bit of jank will delete any object that is currently being used in memory
+    }
+
+    pub fn destroy_other(&mut self, celeste: &mut Celeste) {
+        celeste.objects.retain(|objref| match objref.try_borrow() {
+            Ok(obj) => obj.name == self.name && obj.pos == self.pos,
+            Err(_) => true,
+        });
     }
 }
 pub enum ObjectType {
@@ -185,7 +225,8 @@ pub enum ObjectType {
     Balloon(Rc<RefCell<Balloon>>),
     Spring(Rc<RefCell<Spring>>),
     FallFloor(Rc<RefCell<FallFloor>>),
-    BaseObject(Rc<RefCell<BaseObject>>)
+    Platform(Rc<RefCell<Platform>>),
+    BaseObject(Rc<RefCell<BaseObject>>),
 }
 // pub trait Object {
 //     fn pos(&self) -> &Vector;
@@ -209,102 +250,102 @@ pub enum ObjectType {
 //     fn update(&mut self, celeste: &mut Celeste);
 //     fn draw(&mut self, celeste: &mut Celeste);
 
-    // fn left(&self) -> f32 {
-    //     self.pos().x + self.hitbox().x
-    // }
-    // fn right(&self) -> f32 {
-    //     self.left() + self.hitbox().w - 1f32
-    // }
-    // fn top(&self) -> f32 {
-    //     self.pos().y + self.hitbox().y
-    // }
-    // fn bottom(&self) -> f32 {
-    //     self.top() + self.hitbox().h - 1f32
-    // }
+// fn left(&self) -> f32 {
+//     self.pos().x + self.hitbox().x
+// }
+// fn right(&self) -> f32 {
+//     self.left() + self.hitbox().w - 1f32
+// }
+// fn top(&self) -> f32 {
+//     self.pos().y + self.hitbox().y
+// }
+// fn bottom(&self) -> f32 {
+//     self.top() + self.hitbox().h - 1f32
+// }
 //     fn init_smoke(&self, x: f32, y: f32) {
 //         // do later
 //     }
-    // fn draw_sprite(&self, celeste: &mut Celeste) {
-    //     celeste.mem.spr(
-    //         *self.spr(),
-    //         self.pos().x as i32,
-    //         self.pos().y as i32,
-    //         Some((*self.flip()).clone()),
-    //     )
-    // }
-    // fn do_move(&mut self, celeste: &mut Celeste, ox: f32, oy: f32, start: f32) {
-    //     self.rem_mut().x += ox;
-    //     let amt = (self.rem().x + 0.5).floor();
-    //     self.rem_mut().x -= amt;
-    //     if true {
-    //         let step = sign(amt);
-    //         let mut i = start;
-    //         loop {
-    //             self.pos_mut().x += step;
-    //             if self.is_solid(step, 0f32, celeste) {
-    //                 self.pos_mut().x -= step;
-    //                 self.spd_mut().x = 0f32;
-    //                 self.rem_mut().x = 0f32;
-    //                 break;
-    //             }
-    //             if i >= amt.abs() {
-    //                 break;
-    //             }
-    //             i += 1f32;
-    //         }
-    //     } else {
-    //         self.pos_mut().x += amt;
-    //     }
+// fn draw_sprite(&self, celeste: &mut Celeste) {
+//     celeste.mem.spr(
+//         *self.spr(),
+//         self.pos().x as i32,
+//         self.pos().y as i32,
+//         Some((*self.flip()).clone()),
+//     )
+// }
+// fn do_move(&mut self, celeste: &mut Celeste, ox: f32, oy: f32, start: f32) {
+//     self.rem_mut().x += ox;
+//     let amt = (self.rem().x + 0.5).floor();
+//     self.rem_mut().x -= amt;
+//     if true {
+//         let step = sign(amt);
+//         let mut i = start;
+//         loop {
+//             self.pos_mut().x += step;
+//             if self.is_solid(step, 0f32, celeste) {
+//                 self.pos_mut().x -= step;
+//                 self.spd_mut().x = 0f32;
+//                 self.rem_mut().x = 0f32;
+//                 break;
+//             }
+//             if i >= amt.abs() {
+//                 break;
+//             }
+//             i += 1f32;
+//         }
+//     } else {
+//         self.pos_mut().x += amt;
+//     }
 
-    //     self.rem_mut().y += oy;
-    //     let amt = (self.rem().y + 0.5).floor();
-    //     self.rem_mut().y -= amt;
-    //     if true {
-    //         let step = sign(amt);
-    //         let mut i = 0f32; //start
-    //         loop {
-    //             self.pos_mut().y += step;
-    //             if self.is_solid(0f32, step, celeste) {
-    //                 self.pos_mut().y -= step;
-    //                 self.spd_mut().y = 0f32;
-    //                 self.rem_mut().y = 0f32;
-    //                 break;
-    //             }
-    //             if i >= amt.abs() {
-    //                 break;
-    //             }
-    //             i += 1f32;
-    //         }
-    //     } else {
-    //         self.pos_mut().x += amt;
-    //     }
-    // }
-    // fn check(
-    //     &mut self,
-    //     celeste: &mut Celeste,
-    //     name: &'static str,
-    //     x: f32,
-    //     y: f32,
-    // ) -> Option<usize> {
-    //     let obj = self;
-    //     for i in 0..celeste.objects.len() {
-    //         match celeste.objects[i].try_borrow() {
-    //             Ok(other) => {
-    //                 if other.name() == name && *other.collidable() {
-    //                     if other.right() >= obj.left() + x
-    //                         && other.bottom() >= obj.top()
-    //                         && other.left() <= obj.right() + x
-    //                         && other.top() <= obj.bottom() + y
-    //                     {
-    //                         return Some(i);
-    //                     }
-    //                 }
-    //             }
-    //             Err(_) => {}
-    //         };
-    //     }
-    //     None
-    // }
+//     self.rem_mut().y += oy;
+//     let amt = (self.rem().y + 0.5).floor();
+//     self.rem_mut().y -= amt;
+//     if true {
+//         let step = sign(amt);
+//         let mut i = 0f32; //start
+//         loop {
+//             self.pos_mut().y += step;
+//             if self.is_solid(0f32, step, celeste) {
+//                 self.pos_mut().y -= step;
+//                 self.spd_mut().y = 0f32;
+//                 self.rem_mut().y = 0f32;
+//                 break;
+//             }
+//             if i >= amt.abs() {
+//                 break;
+//             }
+//             i += 1f32;
+//         }
+//     } else {
+//         self.pos_mut().x += amt;
+//     }
+// }
+// fn check(
+//     &mut self,
+//     celeste: &mut Celeste,
+//     name: &'static str,
+//     x: f32,
+//     y: f32,
+// ) -> Option<usize> {
+//     let obj = self;
+//     for i in 0..celeste.objects.len() {
+//         match celeste.objects[i].try_borrow() {
+//             Ok(other) => {
+//                 if other.name() == name && *other.collidable() {
+//                     if other.right() >= obj.left() + x
+//                         && other.bottom() >= obj.top()
+//                         && other.left() <= obj.right() + x
+//                         && other.top() <= obj.bottom() + y
+//                     {
+//                         return Some(i);
+//                     }
+//                 }
+//             }
+//             Err(_) => {}
+//         };
+//     }
+//     None
+// }
 //     // fn move_x(&mut self, amt: f32, start: f32, celeste: &mut Celeste) {
 //     //     //solids?
 //     //     if true {
@@ -354,41 +395,41 @@ pub enum ObjectType {
 //     //     //     end
 //     //     //   end
 //     // }
-    // fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
-    //     // log!(celeste, "d");
-    //     return self.is_flag(x, y, 1, celeste);
-    //     // return (y > 0f32
-    //     //     && self.check(celeste, "platform", x, 0f32).is_none()
-    //     //     && self.check(celeste, "platform", x, y).is_some())
-    //     //     || self.is_flag(x, y, 0, celeste)
-    //     //     || self.check(celeste, "fall_floor", x, y).is_some()
-    //     //     || self.check(celeste, "fake_wall", x, y).is_some();
-    // }
-    // fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
-    //     // log!(celeste, max(0f32, self.left() / 8f32));
-    //     // log!(
-    //     //     celeste,
-    //     //     max(0f32, (self.top() + y) / 8f32) as i32
-    //     //         - (min(15f32, (self.bottom() + y) / 8f32)) as i32
-    //     // );
-    //     // log!(celeste, min(15f32, (self.bottom() + y) / 8f32) as i32);
+// fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
+//     // log!(celeste, "d");
+//     return self.is_flag(x, y, 1, celeste);
+//     // return (y > 0f32
+//     //     && self.check(celeste, "platform", x, 0f32).is_none()
+//     //     && self.check(celeste, "platform", x, y).is_some())
+//     //     || self.is_flag(x, y, 0, celeste)
+//     //     || self.check(celeste, "fall_floor", x, y).is_some()
+//     //     || self.check(celeste, "fake_wall", x, y).is_some();
+// }
+// fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
+//     // log!(celeste, max(0f32, self.left() / 8f32));
+//     // log!(
+//     //     celeste,
+//     //     max(0f32, (self.top() + y) / 8f32) as i32
+//     //         - (min(15f32, (self.bottom() + y) / 8f32)) as i32
+//     // );
+//     // log!(celeste, min(15f32, (self.bottom() + y) / 8f32) as i32);
 
-    //     // let mut i = );
-    //     for i in max(0f32, (self.left() + x + 1.0) / 8f32) as i32
-    //         ..(min(15f32, (self.right() + x - 1.0) / 8f32)) as i32 + 1
-    //     {
-    //         for j in max(0f32, (self.top() + y + 1.0) / 8f32) as i32
-    //             ..min(15f32, (self.bottom() + y - 1.0) / 8f32) as i32 + 1
-    //         {
-    //             let fg = celeste.mem.fget_all(celeste.mem.mget(
-    //                 (celeste.room.x as u8 * 16) + i as u8,
-    //                 (celeste.room.y as u8 * 16) + j as u8,
-    //             ));
-    //             if (flag & fg) == flag {
-    //                 return true;
-    //             }
-    //         }
-    //     }
+//     // let mut i = );
+//     for i in max(0f32, (self.left() + x + 1.0) / 8f32) as i32
+//         ..(min(15f32, (self.right() + x - 1.0) / 8f32)) as i32 + 1
+//     {
+//         for j in max(0f32, (self.top() + y + 1.0) / 8f32) as i32
+//             ..min(15f32, (self.bottom() + y - 1.0) / 8f32) as i32 + 1
+//         {
+//             let fg = celeste.mem.fget_all(celeste.mem.mget(
+//                 (celeste.room.x as u8 * 16) + i as u8,
+//                 (celeste.room.y as u8 * 16) + j as u8,
+//             ));
+//             if (flag & fg) == flag {
+//                 return true;
+//             }
+//         }
+//     }
 //         // let mut i = max(0f32, (self.left() + x) / 8f32);
 //         // loop {
 //         //     let mut j = max(0f32, (self.top() + y) / 8f32);

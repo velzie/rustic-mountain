@@ -39,6 +39,7 @@ impl Player {
                 h: 5.0,
             },
             collidable: true,
+            solids: true,
             obj_type: ObjectType::Player(Rc::new(RefCell::new(Self {
                 grace: 0,
                 jbuffer: 0,
@@ -83,7 +84,7 @@ impl Player {
         ) || obj.pos.y > 128.0
         {
             // spike kill
-            celeste.next_room();
+            this.kill(obj, celeste);
         }
 
         let on_ground = obj.is_solid(0.0, 2.0, celeste);
@@ -401,6 +402,10 @@ impl Player {
         obj.draw_sprite(celeste);
         celeste.mem.pal(8, 8);
     }
+    pub fn kill(&mut self, obj: &mut Object, celeste: &mut Celeste) {
+        celeste.delay_restart = 15;
+        obj.destroy_self(celeste);
+    }
 }
 
 pub struct Balloon {
@@ -423,6 +428,7 @@ impl Balloon {
             },
             flip: FlipState { x: false, y: false },
             collidable: true,
+            solids: false,
             obj_type: ObjectType::Balloon(Rc::new(RefCell::new(Self {
                 offset: celeste.mem.rng.gen_range(0.0..1.0),
                 timer: 0.0,
@@ -504,6 +510,7 @@ impl Spring {
                 h: 8.0,
             },
             flip: FlipState { x: false, y: false },
+            solids: false,
             collidable: true,
             obj_type: ObjectType::Spring(Rc::new(RefCell::new(Self {
                 hide_in: 0,
@@ -530,7 +537,7 @@ impl Spring {
             }
         } else if obj.spr == 18 {
             let hit = obj.check(celeste, "Player", 0.0, 0.0);
-            dbg!(&hit);
+            // dbg!(&hit);
             match hit {
                 Some(i) => {
                     // panic!();
@@ -580,7 +587,7 @@ impl Spring {
 }
 pub struct FallFloor {
     state: u8,
-    delay:u8,
+    delay: u8,
 }
 impl FallFloor {
     pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
@@ -588,7 +595,7 @@ impl FallFloor {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
             rem: Vector { x: 0.0, y: 0.0 },
-            spr: 1,
+            spr: 23,
             hitbox: Rectangle {
                 x: 0.0,
                 y: 0.0,
@@ -597,10 +604,11 @@ impl FallFloor {
             },
             flip: FlipState { x: false, y: false },
             collidable: true,
-            obj_type: ObjectType::FallFloor(Rc::new(RefCell::new(Self { state: 0,delay:0 }))),
+            obj_type: ObjectType::FallFloor(Rc::new(RefCell::new(Self { state: 0, delay: 0 }))),
             draw: Self::draw,
             update: Self::update,
             name: "FallFloor",
+            solids: false,
         }
     }
     fn update(obj: &mut Object, celeste: &mut Celeste) {
@@ -609,6 +617,31 @@ impl FallFloor {
             _ => unreachable!(),
         };
         let mut this = tref.borrow_mut();
+        if this.state == 0 {
+            for i in 0..3 {
+                if obj
+                    .check(celeste, "Player", (i - 1) as f32, -(i % 2) as f32)
+                    .is_some()
+                {
+                    this.break_floor(obj, celeste);
+                }
+            }
+        } else if this.state == 1 {
+            this.delay -= 1;
+            if this.delay <= 0 {
+                this.state = 2;
+                this.delay = 60;
+                obj.collidable = false;
+            }
+        } else if this.state == 2 {
+            this.delay -= 1;
+            if this.delay <= 0 && obj.check(celeste, "Player", 0.0, 0.0).is_none() {
+                // psfx 7
+                this.state = 0;
+                obj.collidable = true;
+                //smoke
+            }
+        }
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
@@ -616,25 +649,101 @@ impl FallFloor {
             _ => unreachable!(),
         };
         let mut this = tref.borrow_mut();
-        celeste.mem.spr(if this.state == 1{
-            26-this.delay/5
-        }else if this.state == 0{
-            23
-        }else{
-            0
-        },obj.pos.x as i32,obj.pos.y as i32,None);
+        celeste.mem.spr(
+            if this.state == 1 {
+                26 - this.delay / 5
+            } else if this.state == 0 {
+                23
+            } else {
+                0
+            },
+            obj.pos.x as i32,
+            obj.pos.y as i32,
+            None,
+        );
         // this.state==1 and
-         // 26-this.delay/5 or 
-         // this.state==0 and 23
+        // 26-this.delay/5 or
+        // this.state==0 and 23
     }
-    pub fn break_floor(&mut self,obj: &mut Object,celeste: &mut Celeste){
-        if self.state == 0{
+    pub fn break_floor(&mut self, obj: &mut Object, celeste: &mut Celeste) {
+        if self.state == 0 {
             //psfx 15
             self.state = 1;
             self.delay = 15;
             // obj.init_smoke(x, y)
             let springobj = obj.check(celeste, "Spring", 0.0, -1.0);
-            sp
+            // sp
+        }
+    }
+}
+
+pub struct Platform {
+    last: f32,
+    dir: f32,
+}
+impl Platform {
+    pub fn init(celeste: &mut Celeste, x: f32, y: f32, spr: u8) -> Object {
+        Object {
+            pos: Vector { x: x - 4.0, y },
+            spd: Vector { x: 0.0, y: 0.0 },
+            rem: Vector { x: 0.0, y: 0.0 },
+            spr,
+            hitbox: Rectangle {
+                x: 0.0,
+                y: 0.0,
+                w: 16.0,
+                h: 8.0,
+            },
+            flip: FlipState { x: false, y: false },
+            collidable: true,
+            solids: false,
+            obj_type: ObjectType::Platform(Rc::new(RefCell::new(Self {
+                last: -4.0,
+                dir: if spr == 11 { -1.0 } else { 1.0 },
+            }))),
+            draw: Self::draw,
+            update: Self::update,
+            name: "Platform",
+        }
+    }
+    fn update(obj: &mut Object, celeste: &mut Celeste) {
+        let tref = match &mut obj.obj_type {
+            ObjectType::Platform(p) => p.clone(),
+            _ => unreachable!(),
+        };
+        let mut this = tref.borrow_mut();
+        obj.spd.x = this.dir * 0.65;
+        if obj.pos.x < -16.0 {
+            obj.pos.x = 128.0;
+        } else if obj.pos.x > 128.0 {
+            obj.pos.x = -16.0;
+        }
+        if obj.check(celeste, "Player", 0.0, 0.0).is_none() {
+            match obj.check(celeste, "Player", 0.0, -1.0) {
+                Some(pind) => {
+                    let mut playerref = celeste.objects[pind].clone();
+                    let mut playerobj = playerref.borrow_mut();
+                    // drop(&playerref);
+                    playerobj.do_move(celeste, obj.pos.x - this.last, 0.0, 1.0)
+                }
+                None => (),
+            }
+        }
+        this.last = obj.pos.x;
+    }
+    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+        let tref = match &mut obj.obj_type {
+            ObjectType::Platform(p) => p.clone(),
+            _ => unreachable!(),
+        };
+        let mut this = tref.borrow_mut();
+        for i in 0..2 {
+            celeste.mem.spr(
+                11 + i,
+                obj.pos.x as i32 + (i * 8) as i32,
+                obj.pos.y as i32 - 1,
+                None,
+            )
         }
     }
 }
@@ -655,6 +764,7 @@ impl BaseObject {
             },
             flip: FlipState { x: false, y: false },
             collidable: true,
+            solids: false,
             obj_type: ObjectType::BaseObject(Rc::new(RefCell::new(Self {}))),
             draw: Self::draw,
             update: Self::update,
