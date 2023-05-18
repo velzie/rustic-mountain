@@ -5,9 +5,11 @@ use rand::Rng;
 
 use crate::utils::mid;
 use crate::{memory::Memory, structures::*, utils::*, Celeste};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Spring {
-    hide_in: u8,
+    pub hide_in: u8,
     hide_for: u8,
     delay: u8,
 }
@@ -55,12 +57,14 @@ impl Spring {
             // dbg!(&hit);
             match hit {
                 Some(i) => {
-                    // panic!();
-                    let mut playerobj = celeste.objects[i].borrow_mut();
+                    // panic!();'
+                    let jref = celeste.objects[i].clone();
+                    let mut playerobj = jref.borrow_mut();
                     let pref = match &mut playerobj.obj_type {
                         ObjectType::Player(p) => p.clone(),
                         _ => unreachable!(),
                     };
+
                     let mut player = pref.borrow_mut();
                     if playerobj.spd.y >= 0.0 {
                         obj.spr = 19;
@@ -69,8 +73,19 @@ impl Spring {
                         playerobj.spd.y = -3.0;
                         player.djump = celeste.max_djump;
                         this.delay = 10;
-                        //init smoke
-                        // break fall floor
+                        obj.init_smoke(celeste, 0.0, 0.0);
+
+                        let floordex = obj.check(celeste, "FallFloor", 0.0, 1.0);
+                        if let Some(i) = floordex {
+                            let oref = celeste.objects[i].clone();
+                            let mut floorobj = oref.borrow_mut();
+                            let fref = match &mut floorobj.obj_type {
+                                ObjectType::FallFloor(p) => p.clone(),
+                                _ => unreachable!(),
+                            };
+                            let mut floor = fref.borrow_mut();
+                            floor.break_floor(&mut floorobj, celeste);
+                        }
                         // psfx 8
                     }
                 }

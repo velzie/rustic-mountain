@@ -10,16 +10,18 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use memory::Memory;
 use objects::{
-    balloon::Balloon, fallfloor::FallFloor, platform::Platform, player::Player, spring::Spring, playerspawn::PlayerSpawn,
+    balloon::Balloon, bigchest::BigChest, fallfloor::FallFloor, flag::Flag, fruit::Fruit,
+    platform::Platform, player::Player, playerspawn::PlayerSpawn, spring::Spring,
 };
+use serde::{Deserialize, Serialize};
 use structures::*;
 
 use rand::prelude::*;
-
+#[derive(Serialize)]
 pub struct Celeste {
     pub mem: Memory,
     pub objects: Vec<Rc<RefCell<Object>>>,
-    pub got_fruit: u8,
+    pub got_fruit: Vec<bool>,
     pub max_djump: u8,
     pub deaths: u8,
     pub frames: u64,
@@ -29,9 +31,10 @@ pub struct Celeste {
     pub has_key: bool,
     pub freeze: u8,
     pub particles: Vec<Particle>,
+    pub dead_particles: Vec<DeadParticle>,
     pub delay_restart: u8,
     pub shake: u8,
-    clouds: Vec<Cloud>,
+    pub clouds: Vec<Cloud>,
 }
 
 impl Celeste {
@@ -66,7 +69,7 @@ impl Celeste {
             room: Vector { x: 0f32, y: 0f32 },
             mem,
             objects: vec![],
-            got_fruit: 0,
+            got_fruit: vec![],
             max_djump: 1,
             deaths: 0,
             frames: 0,
@@ -76,6 +79,7 @@ impl Celeste {
             freeze: 0,
             clouds,
             particles,
+            dead_particles: vec![],
             delay_restart: 0,
             shake: 0,
         };
@@ -121,6 +125,8 @@ impl Celeste {
                 y: obj.spd.y,
             };
             drop(obj);
+            // dbg!();
+
             v.borrow_mut().do_move(self, spd.x, spd.y, 0f32);
             v.borrow_mut().update(self);
         }
@@ -184,7 +190,7 @@ impl Celeste {
         // do particles here
         for particle in &mut self.particles {
             particle.x += particle.spd;
-            particle.y += particle.off.sin();
+            particle.y += particle.off.to_degrees().sin();
 
             self.mem.rectfill(
                 particle.x as i32,
@@ -198,13 +204,30 @@ impl Celeste {
                 particle.y = self.mem.rng.gen_range(0.0..128.0);
             }
         }
+        for particle in &mut self.dead_particles {
+            particle.x += particle.dx;
+            particle.y += particle.dy;
+
+            particle.t -= 0.2;
+
+            if particle.t > 0.0 {
+                self.mem.rectfill(
+                    (particle.x - particle.t) as i32,
+                    (particle.y - particle.t) as i32,
+                    (particle.x + particle.t) as i32,
+                    (particle.y + particle.t) as i32,
+                    14 + ((particle.t * 5.0) % 2.0) as u8,
+                );
+            }
+        }
+        self.dead_particles.retain(|f| f.t > 0.0);
     }
     pub fn next_room(&mut self) {
         // do sound at some point
         self.level += 1;
         self.load_room(self.level % 8, self.level / 8);
     }
-    fn load_room(&mut self, x: u8, y: u8) {
+    pub fn load_room(&mut self, x: u8, y: u8) {
         self.objects.clear();
 
         self.room = Vector {
@@ -220,9 +243,23 @@ impl Celeste {
                 match match tile {
                     1 => Some(PlayerSpawn::init(self, x, y)),
                     11 | 12 => Some(Platform::init(self, x, y, tile)),
-                    22 => Some(Balloon::init(self, x, y)),
                     18 => Some(Spring::init(self, x, y)),
+                    22 => Some(Balloon::init(self, x, y)),
                     23 => Some(FallFloor::init(self, x, y)),
+                    26 => {
+                        if self.got_fruit.len() > self.level as usize
+                            && self.got_fruit[self.level as usize]
+                        {
+                            None
+                        } else {
+                            Some(Fruit::init(self, x, y))
+                        }
+                    }
+                    // fly fruit
+                    // fake wall
+                    // message
+                    96 => Some(BigChest::init(self, x, y)),
+                    118 => Some(Flag::init(self, x, y)),
                     _ => None,
                 } {
                     Some(o) => {
@@ -281,17 +318,30 @@ impl Celeste {
     //  end
     // end
 }
-struct Cloud {
-    x: i32,
-    y: i32,
-    spd: i32,
-    w: i32,
+#[derive(Serialize, Deserialize)]
+
+pub struct Cloud {
+    pub x: i32,
+    pub y: i32,
+    pub spd: i32,
+    pub w: i32,
 }
+#[derive(Serialize, Deserialize)]
+
 pub struct Particle {
-    x: f32,
-    y: f32,
-    s: f32,
-    spd: f32,
-    off: f32,
-    c: u8,
+    pub x: f32,
+    pub y: f32,
+    pub s: f32,
+    pub spd: f32,
+    pub off: f32,
+    pub c: u8,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct DeadParticle {
+    pub x: f32,
+    pub y: f32,
+    pub t: f32,
+    pub dx: f32,
+    pub dy: f32,
 }

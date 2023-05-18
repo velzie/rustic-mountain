@@ -5,7 +5,9 @@ use rand::Rng;
 
 use crate::utils::mid;
 use crate::{memory::Memory, structures::*, utils::*, Celeste};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct FallFloor {
     state: u8,
     delay: u8,
@@ -60,7 +62,7 @@ impl FallFloor {
                 // psfx 7
                 this.state = 0;
                 obj.collidable = true;
-                //smoke
+                obj.init_smoke(celeste, 0.0, 0.0);
             }
         }
     }
@@ -91,9 +93,20 @@ impl FallFloor {
             //psfx 15
             self.state = 1;
             self.delay = 15;
-            // obj.init_smoke(x, y)
-            let springobj = obj.check(celeste, "Spring", 0.0, -1.0);
-            // sp
+            obj.init_smoke(celeste, 0.0, 0.0);
+            let springdex = obj.check(celeste, "Spring", 0.0, -1.0);
+            match springdex {
+                Some(i) => {
+                    let jref = celeste.objects[i].clone();
+                    let mut springobj = jref.borrow_mut();
+                    let pref = match &mut springobj.obj_type {
+                        ObjectType::Spring(p) => p.clone(),
+                        _ => unreachable!(),
+                    };
+                    pref.borrow_mut().hide_in = 15;
+                }
+                None => (),
+            }
         }
     }
 }

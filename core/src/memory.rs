@@ -1,12 +1,14 @@
-use std::io;
-
 use crate::{
     structures::{FlipState, Vector},
     utils::{max, mid, min},
     Celeste,
 };
 use rand::{rngs::ThreadRng, thread_rng};
+use serde::{Deserialize, Serialize};
+use std::io;
+#[derive(Serialize, Deserialize)]
 pub struct Memory {
+    #[serde(skip, default = "deflogger")]
     pub logger: Box<dyn Fn(&str)>,
     pub graphics: Vec<u8>,
     pub fontatlas: Vec<bool>,
@@ -14,12 +16,22 @@ pub struct Memory {
     pub sprites: Vec<u8>,
     pub flags: Vec<u8>,
     pub buttons: Vec<bool>,
+
     pub pallete: Vec<ColorState>,
     pub camera: Vector,
-
+    #[serde(skip, default = "defrng")]
     pub rng: ThreadRng,
 }
-#[derive(Debug, Clone)]
+fn deflogger() -> Box<dyn Fn(&str)> {
+    Box::new(dlog)
+}
+fn defrng() -> ThreadRng {
+    thread_rng()
+}
+fn dlog(t: &str) {
+    println!("{}", t);
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ColorState {
     pub color: u8,
     pub transparent: bool,
@@ -212,7 +224,7 @@ impl Memory {
     pub fn palt(&mut self, index: usize, transparent: bool) {
         self.pallete[index].transparent = transparent;
     }
-    pub fn print(&mut self, text: String, x: u8, y: u8, col: u8) {
+    pub fn print(&mut self, text: String, x: i32, y: i32, col: u8) {
         for (i, chr) in text.char_indices() {
             for i in 0..5 {
                 for j in 0..3 {

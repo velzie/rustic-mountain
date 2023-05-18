@@ -5,8 +5,9 @@ use rand::Rng;
 
 use crate::utils::mid;
 use crate::{memory::Memory, structures::*, utils::*, Celeste};
+use serde::{Deserialize, Serialize};
 
-
+#[derive(Serialize, Deserialize)]
 pub struct Balloon {
     offset: f32,
     timer: f32,
@@ -50,14 +51,15 @@ impl Balloon {
             let hit = obj.check(celeste, "Player", 0.0, 0.0);
             match hit {
                 Some(i) => {
-                    let mut playerobj = celeste.objects[i].borrow_mut();
+                    let jref = celeste.objects[i].clone();
+                    let mut playerobj = jref.borrow_mut();
                     let pref = match &mut playerobj.obj_type {
                         ObjectType::Player(p) => p.clone(),
                         _ => unreachable!(),
                     };
                     let mut player = pref.borrow_mut();
                     //psfx 6
-                    // obj.init_smoke(x, y)
+                    obj.init_smoke(celeste, 0.0, 0.0);
                     player.djump = celeste.max_djump;
                     obj.spr = 0;
                     this.timer = 60.0;
@@ -68,7 +70,7 @@ impl Balloon {
             this.timer -= 1.0;
         } else {
             // psfx 7
-            // obj.init_smoke(None)
+            obj.init_smoke(celeste, 0.0, 0.0);
             obj.spr = 22;
         }
     }

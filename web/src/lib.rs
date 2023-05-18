@@ -42,6 +42,12 @@ pub fn render_screen() -> Vec<u8> {
         (*CELESTE).mem.graphics.clone()
     }
 }
+#[wasm_bindgen]
+pub fn skip_level(){
+    unsafe{
+        (*CELESTE).next_room();
+    }
+}
 
 #[wasm_bindgen]
 pub fn set_btn(btn: u8, val: bool) {

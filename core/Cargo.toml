@@ -6,5 +6,6 @@ workspace = "../"
 [dependencies]
 hex = "*"
 lazy_static= "*"
-rand = "*"
+rand = {version= "*",features=["serde"]}
 getrandom = {version = "*", features = ["js"]}
+serde = {version = "*", features=["derive","rc"]}

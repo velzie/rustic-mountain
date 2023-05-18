@@ -3,6 +3,9 @@ use std::{cell::RefCell, rc::Rc};
 use crate::{structures::*, Celeste};
 
 use super::player::Player;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
 pub struct PlayerSpawn {
     target: f32,
     state: u8,
@@ -19,11 +22,11 @@ impl PlayerSpawn {
             hitbox: Rectangle {
                 x: 0.0,
                 y: 0.0,
-                w: 8.0,
-                h: 8.0,
+                w: 0.0,
+                h: 0.0,
             },
             flip: FlipState { x: false, y: false },
-            collidable: true,
+            collidable: false,
             solids: false,
             obj_type: ObjectType::PlayerSpawn(Rc::new(RefCell::new(Self {
                 delay: 0,
@@ -42,42 +45,39 @@ impl PlayerSpawn {
             ObjectType::PlayerSpawn(p) => p.clone(),
             _ => unreachable!(),
         };
+
         let mut this = tref.borrow_mut();
-        if this.state == 0 && obj.pos.y < this.target + 16.0 {
+        if this.state == 0 {
+            //&& obj.pos.y < this.target + 16.0
             this.state = 1;
             this.delay = 3;
         } else if this.state == 1 {
             obj.spd.y += 0.5;
             if obj.spd.y > 0.0 {
-                obj.spd.y = 0.0;
-                this.delay -= 1;
-            } else if obj.pos.y > this.target {
-                obj.pos.y = this.target;
-                obj.spd = Vector { x: 0.0, y: 0.0 };
-                this.state = 2;
-                this.delay = 5;
-                celeste.shake = 5;
-                // init smoke
-                // sfx 5
+                if this.delay > 0 {
+                    obj.spd.y = 0.0;
+                    this.delay -= 1;
+                } else if obj.pos.y > this.target {
+                    obj.pos.y = this.target;
+                    obj.spd = Vector { x: 0.0, y: 0.0 };
+                    this.state = 2;
+                    this.delay = 5;
+                    celeste.shake = 5;
+                    // init smoke
+                    // sfx 5
+                }
             }
         } else if this.state == 2 {
             this.delay -= 1;
             obj.spr = 6;
             if this.delay < 0 {
-                celeste.objects.push(Rc::new(RefCell::new(Player::init(
-                    celeste,
-                    obj.pos.x,
-                    this.target,
-                ))));
+                let player = Player::init(celeste, obj.pos.x, this.target);
+                celeste.objects.push(Rc::new(RefCell::new(player)));
                 obj.destroy_self(celeste);
             }
         }
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
-        let tref = match &mut obj.obj_type {
-            ObjectType::PlayerSpawn(p) => p.clone(),
-            _ => unreachable!(),
-        };
-        let mut this = tref.borrow_mut();
+        obj.draw_sprite(celeste);
     }
 }

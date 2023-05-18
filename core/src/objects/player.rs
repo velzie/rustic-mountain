@@ -4,7 +4,12 @@ use std::rc::Rc;
 use rand::Rng;
 
 use crate::utils::mid;
+use crate::DeadParticle;
 use crate::{memory::Memory, structures::*, utils::*, Celeste};
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+
 pub struct Player {
     pub grace: u8,
     pub jbuffer: u8,
@@ -90,7 +95,7 @@ impl Player {
         let on_ground = obj.is_solid(0.0, 2.0, celeste);
 
         if on_ground && !this.was_on_ground {
-            // init smoke
+            obj.init_smoke(celeste, 0.0, 4.0);
         }
 
         let jump = celeste.mem.buttons[4] && !this.p_jump;
@@ -118,7 +123,7 @@ impl Player {
         }
         // self.dash_effect_time -= 1;
         if this.dash_time > 0 {
-            // init smoke
+            obj.init_smoke(celeste, 0.0, 0.0);
             this.dash_time -= 1;
             obj.spd = Vector {
                 x: appr(obj.spd.x, this.dash_target_x, this.dash_accel_x),
@@ -191,12 +196,16 @@ impl Player {
                     } else {
                         0f32
                     };
-                    this.jbuffer = 0;
                     if wall_dir != 0f32 {
+                        // psfx 2
+                        this.jbuffer = 0;
                         obj.spd = Vector {
                             x: wall_dir * (-1f32 - maxrun),
                             y: -2f32,
                         };
+                        if !obj.is_ice(wall_dir * 3.0, 0.0, celeste) {
+                            obj.init_smoke(celeste, wall_dir * 6.0, 0.0);
+                        }
                     }
                 }
             }
@@ -231,7 +240,7 @@ impl Player {
             let d_half = 3.5355339059;
             if this.djump > 0 && dash {
                 // (celeste.mem.logger)("??");
-                // init smoke
+                obj.init_smoke(celeste, 0.0, 0.0);
                 this.djump -= 1;
                 this.dash_time = 4;
                 celeste.has_dashed = true;
@@ -252,12 +261,11 @@ impl Player {
                         if v_input != 0 {
                             0f32
                         } else {
-                            // if self.flip.x == -1f32 {
-                            //     -1f32
-                            // } else {
-                            //     1f32
-                            // }
-                            0f32
+                            if obj.flip.x {
+                                -1f32
+                            } else {
+                                1f32
+                            }
                         }
                     },
                     y: if v_input != 0 {
@@ -343,7 +351,8 @@ impl Player {
                     1
                 }
             }
-        }
+        };
+        this.was_on_ground = on_ground;
         //   -- was on the ground
         //   this.was_on_ground=on_ground
         //  end,
@@ -404,7 +413,23 @@ impl Player {
         celeste.mem.pal(8, 8);
     }
     pub fn kill(&mut self, obj: &mut Object, celeste: &mut Celeste) {
-        celeste.delay_restart = 15;
         obj.destroy_self(celeste);
+        celeste.dead_particles.clear();
+        let mut i: f32 = 0.0;
+        loop {
+            celeste.dead_particles.push(DeadParticle {
+                x: obj.pos.x,
+                y: obj.pos.y,
+                t: 2.0,
+                dx: i.to_degrees().sin() * 3.0f32,
+                dy: i.to_degrees().cos() * 3.0f32,
+            });
+
+            if i >= 0.875 {
+                break;
+            }
+            i += 0.125;
+        }
+        celeste.delay_restart = 15;
     }
 }

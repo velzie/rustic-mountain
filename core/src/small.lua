@@ -814,7 +814,7 @@ end
 -- [tile dict]
 tiles={}
 foreach(split([[
-1,player_spawn
+1,player_spawn 
 8,key
 11,platform
 12,platform

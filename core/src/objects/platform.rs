@@ -1,7 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::{structures::*, utils, Celeste};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Platform {
     last: f32,
     dir: f32,
@@ -21,7 +23,7 @@ impl Platform {
             },
             flip: FlipState { x: false, y: false },
             collidable: true,
-            solids: true,
+            solids: false,
             obj_type: ObjectType::Platform(Rc::new(RefCell::new(Self {
                 last: -4.0,
                 dir: if spr == 11 { -1.0 } else { 1.0 },
@@ -36,6 +38,7 @@ impl Platform {
             ObjectType::Platform(p) => p.clone(),
             _ => unreachable!(),
         };
+        obj.pos.x += 1.0;
         let mut this = tref.borrow_mut();
         obj.spd.x = this.dir * 0.65;
         if obj.pos.x < -16.0 {

@@ -5,8 +5,9 @@ use std::{cell::RefCell, rc::Rc};
 use crate::{
     memory::Memory,
     objects::{
-        balloon::Balloon, fallfloor::FallFloor, platform::Platform, player::Player,
-        playerspawn::PlayerSpawn, spring::Spring,
+        balloon::Balloon, bigchest::BigChest, fakewall::FakeWall, fallfloor::FallFloor, flag::Flag,
+        fruit::Fruit, lifeup::LifeUp, platform::Platform, player::Player, playerspawn::PlayerSpawn,
+        smoke::Smoke, spring::Spring,
     },
     utils::*,
     Celeste,
@@ -19,23 +20,28 @@ macro_rules! log {
         ($x.mem.logger)(&format!("{}", $y))
     };
 }
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Vector {
     pub x: f32,
     pub y: f32,
 }
+#[derive(Serialize, Deserialize)]
+
 pub struct Rectangle {
     pub x: f32,
     pub y: f32,
     pub w: f32,
     pub h: f32,
 }
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FlipState {
     pub x: bool,
     pub y: bool,
 }
+#[derive(Serialize)]
+
 pub struct Object {
     pub pos: Vector,
     pub spd: Vector,
@@ -48,7 +54,9 @@ pub struct Object {
     pub solids: bool,
 
     pub obj_type: ObjectType,
+    #[serde(skip)]
     pub draw: fn(&mut Object, &mut Celeste),
+    #[serde(skip)]
     pub update: fn(&mut Object, &mut Celeste),
     pub name: &'static str,
 }
@@ -72,7 +80,10 @@ impl Object {
         self.top() + self.hitbox.h - 1f32
     }
 
-    pub fn init_smoke(&self, x: f32, y: f32) {}
+    pub fn init_smoke(&self, celeste: &mut Celeste, x: f32, y: f32) {
+        let smoke = Smoke::init(celeste, self.pos.x + x, self.pos.y + y);
+        celeste.objects.push(Rc::new(RefCell::new(smoke)));
+    }
 
     pub fn draw_sprite(&self, celeste: &mut Celeste) {
         celeste.mem.spr(
@@ -156,6 +167,9 @@ impl Object {
         }
         None
     }
+    pub fn is_ice(&self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
+        self.is_flag(x, y, 4, celeste)
+    }
     pub fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
         // log!(celeste, "d");
         // return self.is_flag(x, y, 1, celeste);
@@ -166,7 +180,7 @@ impl Object {
             || self.check(celeste, "FallFloor", x, y).is_some()
             || self.check(celeste, "FakeWall", x, y).is_some();
     }
-    pub fn is_flag(&mut self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
+    pub fn is_flag(&self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
         for i in max(0f32, (self.left() + x) / 8f32) as i32
             ..(min(15f32, (self.right() + x) / 8f32)) as i32 + 1
         {
@@ -223,6 +237,8 @@ impl Object {
         });
     }
 }
+
+#[derive(Serialize, Deserialize)]
 pub enum ObjectType {
     Player(Rc<RefCell<Player>>),
     PlayerSpawn(Rc<RefCell<PlayerSpawn>>),
@@ -230,6 +246,12 @@ pub enum ObjectType {
     Spring(Rc<RefCell<Spring>>),
     FallFloor(Rc<RefCell<FallFloor>>),
     Platform(Rc<RefCell<Platform>>),
+    Smoke(Rc<RefCell<Smoke>>),
+    BigChest(Rc<RefCell<BigChest>>),
+    Flag(Rc<RefCell<Flag>>),
+    Fruit(Rc<RefCell<Fruit>>),
+    LifeUp(Rc<RefCell<LifeUp>>),
+    FakeWall(Rc<RefCell<FakeWall>>),
 }
 // pub trait Object {
 //     fn pos(&self) -> &Vector;

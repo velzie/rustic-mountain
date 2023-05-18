@@ -6,8 +6,8 @@ use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct BaseObject {}
-impl BaseObject {
+pub struct FakeWall {}
+impl FakeWall {
     pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
@@ -17,30 +17,26 @@ impl BaseObject {
             hitbox: Rectangle {
                 x: -1.0,
                 y: -1.0,
-                w: 10.0,
-                h: 10.0,
+                w: 18.0,
+                h: 18.0,
             },
             flip: FlipState { x: false, y: false },
             collidable: true,
             solids: false,
-            obj_type: ObjectType::BaseObject(Rc::new(RefCell::new(Self {}))),
+            obj_type: ObjectType::FakeWall(Rc::new(RefCell::new(Self {}))),
             draw: Self::draw,
             update: Self::update,
-            name: "BaseObject",
+            name: "FakeWall",
         }
     }
     fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
-            ObjectType::BaseObject(p) => p.clone(),
+            ObjectType::FakeWall(p) => p.clone(),
             _ => unreachable!(),
         };
         let mut this = tref.borrow_mut();
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
-        let tref = match &mut obj.obj_type {
-            ObjectType::BaseObject(p) => p.clone(),
-            _ => unreachable!(),
-        };
-        let mut this = tref.borrow_mut();
+        // celeste.mem.spr()
     }
 }
