@@ -8,7 +8,7 @@ use crate::DeadParticle;
 use crate::{memory::Memory, structures::*, utils::*, Celeste};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 
 pub struct Player {
     pub grace: u8,
