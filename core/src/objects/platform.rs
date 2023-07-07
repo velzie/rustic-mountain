@@ -38,7 +38,6 @@ impl Platform {
             ObjectType::Platform(p) => p.clone(),
             _ => unreachable!(),
         };
-        obj.pos.x += 1.0;
         let mut this = tref.borrow_mut();
         obj.spd.x = this.dir * 0.65;
         if obj.pos.x < -16.0 {
@@ -50,7 +49,7 @@ impl Platform {
         if obj.check(celeste, "Player", 0.0, 0.0).is_none() {
             match obj.check(celeste, "Player", 0.0, -1.0) {
                 Some(pind) => {
-                    let mut playerref = celeste.objects[pind].clone();
+                    let playerref = celeste.objects[pind].clone();
                     let mut playerobj = playerref.borrow_mut();
                     playerobj.do_move(celeste, obj.pos.x - this.last, 0.0, 1.0);
                     // drop(&playerref);

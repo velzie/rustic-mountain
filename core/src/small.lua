@@ -814,7 +814,7 @@ end
 -- [tile dict]
 tiles={}
 foreach(split([[
-1,player_spawn 
+1,player_spawn
 8,key
 11,platform
 12,platform
@@ -863,7 +863,7 @@ function init_object(type,x,y,tile)
  end
 
  function obj.is_solid(ox,oy)
-  return (oy>0 and not obj.check(platform,ox,0) and obj.check(platform,ox,oy)) or
+  return (oy>0  and obj.check(platform,ox,oy)) or
       obj.is_flag(ox,oy,0) or
       obj.check(fall_floor,ox,oy) or
       obj.check(fake_wall,ox,oy)
@@ -909,7 +909,9 @@ function init_object(type,x,y,tile)
     local step=sign(amt)
     for i=start,abs(amt) do
      obj[axis]+=step
-     if obj.is_solid(0,0) then
+     if obj.is_flag(ox,oy,0) or
+     obj.check(fall_floor,ox,oy) or
+     obj.check(fake_wall,ox,oy) then
       obj[axis]-=step
       obj.spd[axis],obj.rem[axis]=0,0
       break

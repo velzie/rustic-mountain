@@ -92,7 +92,7 @@ impl Player {
             this.kill(obj, celeste);
         }
 
-        let on_ground = obj.is_solid(0.0, 2.0, celeste);
+        let on_ground = obj.is_solid(0.0, 1.0, celeste);
 
         if on_ground && !this.was_on_ground {
             obj.init_smoke(celeste, 0.0, 4.0);

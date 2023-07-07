@@ -74,7 +74,8 @@ impl FallFloor {
         let mut this = tref.borrow_mut();
         celeste.mem.spr(
             if this.state == 1 {
-                26 - this.delay / 5
+                u8::max(25 - this.delay / 5, 23) // i shouldn't need this max(), but i do for some
+                                                 // reason. [TODO]: accuracy
             } else if this.state == 0 {
                 23
             } else {

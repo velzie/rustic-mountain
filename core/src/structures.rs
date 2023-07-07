@@ -102,9 +102,9 @@ impl Object {
             let step = sign(amt);
             let mut i = start;
             loop {
-                self.pos.x += step;
-                if self.is_solid(0f32, 0f32, celeste) {
-                    self.pos.x -= step;
+                if !self.is_solid(step, 0f32, celeste) {
+                    self.pos.x += step;
+                } else {
                     self.spd.x = 0f32;
                     self.rem.x = 0f32;
                     break;
@@ -125,9 +125,9 @@ impl Object {
             let step = sign(amt);
             let mut i = 0f32; //start
             loop {
-                self.pos.y += step;
-                if self.is_solid(0f32, 0f32, celeste) {
-                    self.pos.y -= step;
+                if !self.is_solid(0f32, step, celeste) {
+                    self.pos.y += step;
+                } else {
                     self.spd.y = 0f32;
                     self.rem.y = 0f32;
                     break;
@@ -173,12 +173,12 @@ impl Object {
     pub fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
         // log!(celeste, "d");
         // return self.is_flag(x, y, 1, celeste);
+        //
         return (y > 0f32
             && self.check(celeste, "Platform", x, 0f32).is_none()
             && self.check(celeste, "Platform", x, y).is_some())
             || self.is_flag(x, y, 1, celeste)
-            || self.check(celeste, "FallFloor", x, y).is_some()
-            || self.check(celeste, "FakeWall", x, y).is_some();
+            || self.check(celeste, "FallFloor", x, y).is_some();
     }
     pub fn is_flag(&self, x: f32, y: f32, flag: u8, celeste: &mut Celeste) -> bool {
         for i in max(0f32, (self.left() + x) / 8f32) as i32
