@@ -11,12 +11,14 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 use memory::Memory;
 use objects::{
     balloon::Balloon, bigchest::BigChest, fakewall::FakeWall, fallfloor::FallFloor, flag::Flag,
-    fruit::Fruit, platform::Platform, player::Player, playerspawn::PlayerSpawn, spring::Spring,
+    flyfruit::FlyFruit, fruit::Fruit, platform::Platform, player::Player, playerspawn::PlayerSpawn,
+    spring::Spring,
 };
 use serde::{Deserialize, Serialize};
 use structures::*;
 
 use rand::prelude::*;
+use utils::sin;
 #[derive(Serialize)]
 pub struct Celeste {
     pub mem: Memory,
@@ -192,7 +194,7 @@ impl Celeste {
         // do particles here
         for particle in &mut self.particles {
             particle.x += particle.spd;
-            particle.y += particle.off.to_degrees().sin();
+            particle.y += sin(particle.off);
 
             self.mem.rectfill(
                 particle.x as i32,
@@ -237,6 +239,9 @@ impl Celeste {
             y: y as f32,
         };
 
+        self.has_dashed = false;
+        self.has_key = false;
+
         for i in 0..16 {
             for j in 0..16 {
                 let tile = self.mem.mget(x * 16 + i, y * 16 + j);
@@ -259,7 +264,7 @@ impl Celeste {
                             Some(match tile {
                                 26 => Fruit::init(self, x, y),
                                 64 => FakeWall::init(self, x, y),
-                                // 28 => fly fruit
+                                28 => FlyFruit::init(self, x, y),
                                 _ => unreachable!(),
                             })
                         }

@@ -6,8 +6,8 @@ use crate::{
     memory::Memory,
     objects::{
         balloon::Balloon, bigchest::BigChest, fakewall::FakeWall, fallfloor::FallFloor, flag::Flag,
-        fruit::Fruit, lifeup::LifeUp, platform::Platform, player::Player, playerspawn::PlayerSpawn,
-        smoke::Smoke, spring::Spring,
+        flyfruit::FlyFruit, fruit::Fruit, lifeup::LifeUp, platform::Platform, player::Player,
+        playerspawn::PlayerSpawn, smoke::Smoke, spring::Spring,
     },
     utils::*,
     Celeste,
@@ -121,7 +121,7 @@ impl Object {
         self.rem.y += oy;
         let amt = (self.rem.y + 0.5).floor();
         self.rem.y -= amt;
-        if true {
+        if self.solids {
             let step = sign(amt);
             let mut i = 0f32; //start
             loop {
@@ -138,7 +138,7 @@ impl Object {
                 i += 1f32;
             }
         } else {
-            self.pos.x += amt;
+            self.pos.y += amt;
         }
     }
     pub fn check(
@@ -231,6 +231,7 @@ pub enum ObjectType {
     BigChest(Rc<RefCell<BigChest>>),
     Flag(Rc<RefCell<Flag>>),
     Fruit(Rc<RefCell<Fruit>>),
+    FlyFruit(Rc<RefCell<FlyFruit>>),
     LifeUp(Rc<RefCell<LifeUp>>),
     FakeWall(Rc<RefCell<FakeWall>>),
 }

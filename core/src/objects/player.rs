@@ -421,8 +421,8 @@ impl Player {
                 x: obj.pos.x,
                 y: obj.pos.y,
                 t: 2.0,
-                dx: i.to_degrees().sin() * 3.0f32,
-                dy: i.to_degrees().cos() * 3.0f32,
+                dx: sin(i) * 3.0f32,
+                dy: cos(i) * 3.0f32,
             });
 
             if i >= 0.875 {

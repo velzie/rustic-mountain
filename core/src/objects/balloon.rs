@@ -47,7 +47,7 @@ impl Balloon {
         let mut this = tref.borrow_mut();
         if obj.spr == 22 {
             this.offset += 0.01;
-            obj.pos.y = this.start + this.offset.sin() * 2.0;
+            obj.pos.y = this.start + sin(this.offset) * 2.0;
             let hit = obj.check(celeste, "Player", 0.0, 0.0);
             match hit {
                 Some(i) => {

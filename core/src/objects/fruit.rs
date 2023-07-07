@@ -33,7 +33,7 @@ impl Fruit {
             obj_type: ObjectType::Fruit(Rc::new(RefCell::new(Self { start: y, off: 0.0 }))),
             draw: Self::draw,
             update: Self::update,
-            name: "Balloon",
+            name: "Fruit",
         }
     }
     fn update(obj: &mut Object, celeste: &mut Celeste) {
@@ -43,16 +43,16 @@ impl Fruit {
         };
         let mut this = tref.borrow_mut();
         this.off += 0.025;
-        obj.pos.y = this.start + this.off.sin() * 2.5;
+        obj.pos.y = this.start + sin(this.off) * 2.5;
 
-        update_fruit(obj, celeste);
+        check_fruit(obj, celeste);
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);
     }
 }
 
-pub fn update_fruit(obj: &mut Object, celeste: &mut Celeste) {
+pub fn check_fruit(obj: &mut Object, celeste: &mut Celeste) {
     match obj.check(celeste, "Player", 0.0, 0.0) {
         Some(i) => {
             let jref = celeste.objects[i].clone();

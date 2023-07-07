@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 // pub fn sign()
 // use pico::Pico;
 use crate::Celeste;
@@ -8,6 +10,14 @@ use crate::Celeste;
 
 pub fn min(v1: f32, v2: f32) -> f32 {
     f32::min(v1, v2)
+}
+pub fn sin(percentage: f32) -> f32 {
+    // p8's trig is weird asf
+    f32::sin(percentage * -2.0 * PI)
+}
+pub fn cos(percentage: f32) -> f32 {
+    // p8's trig is weird asf
+    f32::cos(percentage * -2.0 * PI)
 }
 pub fn sign(v: f32) -> f32 {
     if v != 0f32 {
