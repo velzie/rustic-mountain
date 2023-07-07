@@ -1,7 +1,8 @@
 # partially stolen from https://github.com/weewStack/Python-projects/blob/master/000-BMP-Converter/n5110_BMP_converter.py
+# will convert a given bitmap into an array usable in the atlas
 
-import sys  # To get the data from the argument
-import struct  # To unpack the data from the header
+import sys
+import struct 
 
 
 
@@ -26,9 +27,9 @@ with open(f'{file_name}.bmp', 'rb') as bmp:
 
     bmp.seek(offset, 0)
 
-    # bmp_line = ''
-    # bmp_list = []
-    # bmp_list_v = []
+    bmp_line = ''
+    bmp_list = []
+    bmp_list_v = []
 
     out = ""
 
@@ -37,12 +38,12 @@ with open(f'{file_name}.bmp', 'rb') as bmp:
         for byte in range(bmp_b):
             bmp_byte = bmp.read(1)
             bits = format(255-struct.unpack('B', bmp_byte)[0], "08b")
-            out += bits
-    print(out)
+            bmp_line += bits
+        bmp_list.append(bmp_line[:bmp_w])
+        bmp_list_v.append(bmp_line[:bmp_w])
+        bmp_line = ''
+    bmp_list_v.reverse()
 
-    #     bmp_list.append(bmp_line[:bmp_w])
-    #     bmp_list_v.append(bmp_line[:bmp_w])
-    #     bmp_line = ''
-    # bmp_list_v.reverse()
-    # for line in bmp_list_v:
-    #     print(line)
+    for line in bmp_list_v:
+        out += line
+    print(f"\"{out}\"")

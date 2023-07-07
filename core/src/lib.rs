@@ -84,8 +84,10 @@ impl Celeste {
             shake: 0,
         };
         cel.load_room(0, 0);
+        // cel.mem.fontatlas.reverse();
         cel
     }
+
     // pub fn load_level();
     pub fn next_tick(&mut self) {
         self.frames += 1;

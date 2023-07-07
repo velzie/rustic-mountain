@@ -55,7 +55,7 @@ impl Memory {
             logger: Box::new(|s| println!("{}", s)),
             buttons: vec![false; 6],
             graphics,
-            fontatlas: sprites.chars().map(|c| c == '1').collect(),
+            fontatlas: fontatlas.chars().map(|c| c == '0').collect(),
             map: hex::decode(map).unwrap(),
             sprites: sprites
                 .chars()
@@ -224,11 +224,18 @@ impl Memory {
     pub fn palt(&mut self, index: usize, transparent: bool) {
         self.pallete[index].transparent = transparent;
     }
-    pub fn print(&mut self, text: String, x: i32, y: i32, col: u8) {
-        for (i, chr) in text.char_indices() {
-            for i in 0..5 {
-                for j in 0..3 {
-                    // if ()
+    pub fn print(&mut self, text: &str, x: i32, y: i32, col: u8) {
+        for (c, chr) in text.char_indices() {
+            let char_index = chr as usize;
+            for i in 0..3 {
+                for j in 0..5 {
+                    if self.fontatlas[(char_index / 16 * (128 * 8))
+                        + (char_index % 16 * 8)
+                        + i as usize
+                        + (j as usize * 128)]
+                    {
+                        self.pset(col, x + i + (c as i32 * 4), y + j);
+                    }
                 }
             }
         }
