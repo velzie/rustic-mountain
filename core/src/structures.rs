@@ -171,9 +171,6 @@ impl Object {
         self.is_flag(x, y, 4, celeste)
     }
     pub fn is_solid(&mut self, x: f32, y: f32, celeste: &mut Celeste) -> bool {
-        // log!(celeste, "d");
-        // return self.is_flag(x, y, 1, celeste);
-        //
         return (y > 0f32
             && self.check(celeste, "Platform", x, 0f32).is_none()
             && self.check(celeste, "Platform", x, y).is_some())

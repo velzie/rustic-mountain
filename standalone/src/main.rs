@@ -14,7 +14,7 @@ pub fn main() {
         consts::MAPDATA.into(),
         consts::SPRITES.into(),
         consts::FLAGS.into(),
-        "".into(),
+        consts::FONTATLAS.into(),
     );
     let pallete: [(u8, u8, u8); 16] = [
         (0, 0, 0),
