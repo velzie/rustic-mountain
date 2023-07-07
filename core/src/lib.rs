@@ -10,8 +10,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use memory::Memory;
 use objects::{
-    balloon::Balloon, bigchest::BigChest, fallfloor::FallFloor, flag::Flag, fruit::Fruit,
-    platform::Platform, player::Player, playerspawn::PlayerSpawn, spring::Spring,
+    balloon::Balloon, bigchest::BigChest, fakewall::FakeWall, fallfloor::FallFloor, flag::Flag,
+    fruit::Fruit, platform::Platform, player::Player, playerspawn::PlayerSpawn, spring::Spring,
 };
 use serde::{Deserialize, Serialize};
 use structures::*;
@@ -244,22 +244,27 @@ impl Celeste {
                 let y = j as f32 * 8.0;
                 match match tile {
                     1 => Some(PlayerSpawn::init(self, x, y)),
+                    // 8 => key
                     11 | 12 => Some(Platform::init(self, x, y, tile)),
                     18 => Some(Spring::init(self, x, y)),
+                    // 20 => chest
                     22 => Some(Balloon::init(self, x, y)),
                     23 => Some(FallFloor::init(self, x, y)),
-                    26 => {
+                    26 | 64 | 28 => {
                         if self.got_fruit.len() > self.level as usize
                             && self.got_fruit[self.level as usize]
                         {
                             None
                         } else {
-                            Some(Fruit::init(self, x, y))
+                            Some(match tile {
+                                26 => Fruit::init(self, x, y),
+                                64 => FakeWall::init(self, x, y),
+                                // 28 => fly fruit
+                                _ => unreachable!(),
+                            })
                         }
                     }
-                    // fly fruit
-                    // fake wall
-                    // message
+                    // 86 => message
                     96 => Some(BigChest::init(self, x, y)),
                     118 => Some(Flag::init(self, x, y)),
                     _ => None,

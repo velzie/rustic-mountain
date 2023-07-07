@@ -14,7 +14,7 @@ pub struct Player {
     pub grace: u8,
     pub jbuffer: u8,
     pub djump: u8,
-    pub dash_time: u8,
+    pub dash_time: i32,
     pub dash_effect_time: u8,
     pub dash_target_effect: f32,
     pub dash_target_x: f32,
