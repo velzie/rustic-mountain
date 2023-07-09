@@ -8,6 +8,7 @@ pub mod flyfruit;
 pub mod fruit;
 pub mod key;
 pub mod lifeup;
+pub mod message;
 pub mod platform;
 pub mod player;
 pub mod playerspawn;
