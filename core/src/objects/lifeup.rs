@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use rand::Rng;
+
 
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
@@ -11,7 +11,7 @@ pub struct LifeUp {
     flash: f32,
 }
 impl LifeUp {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: -0.25 },

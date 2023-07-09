@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use rand::Rng;
 
-use crate::utils::mid;
-use crate::{memory::Memory, structures::*, utils::*, Celeste};
+
+
+use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -13,7 +13,7 @@ pub struct FallFloor {
     delay: u8,
 }
 impl FallFloor {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -71,7 +71,7 @@ impl FallFloor {
             ObjectType::FallFloor(p) => p.clone(),
             _ => unreachable!(),
         };
-        let mut this = tref.borrow_mut();
+        let this = tref.borrow_mut();
         celeste.mem.spr(
             if this.state == 1 {
                 u8::max(25 - this.delay / 5, 23) // i shouldn't need this max(), but i do for some
@@ -95,7 +95,7 @@ impl FallFloor {
             self.state = 1;
             self.delay = 15;
             obj.init_smoke(celeste, 0.0, 0.0);
-            let springdex = obj.check(celeste, "Spring", 0.0, -1.0);
+            let springdex = obj.check(celeste, "Spring", 0.0, 0.0);
             match springdex {
                 Some(i) => {
                     let jref = celeste.objects[i].clone();

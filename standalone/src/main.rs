@@ -1,5 +1,5 @@
 use rustic_mountain_core::*;
-use structures::*;
+
 mod consts;
 
 use sdl2::event::Event;

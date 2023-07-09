@@ -1,8 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use rand::Rng;
-
-use crate::{structures::*, utils::sign, Celeste};
+use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -11,7 +9,7 @@ pub struct Message {
     last: f32,
 }
 impl Message {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -35,7 +33,7 @@ impl Message {
             name: "FakeWall",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {}
+    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let text = "-- celeste mountain --#this memorial to those# perished on the climb";
         let tref = match &mut obj.obj_type {

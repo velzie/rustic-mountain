@@ -1,11 +1,9 @@
 use crate::{
     structures::{FlipState, Vector},
-    utils::{max, mid, min},
-    Celeste,
 };
 use rand::{rngs::ThreadRng, thread_rng};
 use serde::{Deserialize, Serialize};
-use std::io;
+
 #[derive(Serialize, Deserialize)]
 pub struct Memory {
     #[serde(skip, default = "deflogger")]
@@ -38,7 +36,7 @@ pub struct ColorState {
 }
 impl Memory {
     pub fn new(map: String, sprites: String, flags: String, fontatlas: String) -> Memory {
-        let random = thread_rng();
+        let _random = thread_rng();
         let mut graphics = vec![];
         for i in 0..128 * 128 {
             graphics.push((i % 15) as u8);
@@ -79,8 +77,8 @@ impl Memory {
                 if flip.y {
                     cj = 7 - j;
                 }
-                let color = self.pallete[self.sprites[(((sprite as usize % 16) * 8)
-                    + (((sprite as usize / 16) * 8 * 128) + ci + (cj * 128)))]
+                let color = self.pallete[self.sprites[((sprite as usize % 16) * 8)
+                    + (((sprite as usize / 16) * 8 * 128) + ci + (cj * 128))]
                     as usize]
                     .clone();
 

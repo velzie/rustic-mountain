@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{structures::*, utils, Celeste};
+use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -9,7 +9,7 @@ pub struct Platform {
     dir: f32,
 }
 impl Platform {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32, spr: u8) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32, spr: u8) -> Object {
         Object {
             pos: Vector { x: x - 4.0, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -64,7 +64,7 @@ impl Platform {
             ObjectType::Platform(p) => p.clone(),
             _ => unreachable!(),
         };
-        let mut this = tref.borrow_mut();
+        let _this = tref.borrow_mut();
         for i in 0..2 {
             celeste.mem.spr(
                 11 + i,

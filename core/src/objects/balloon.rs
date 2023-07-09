@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use rand::Rng;
 
-use crate::utils::mid;
-use crate::{memory::Memory, structures::*, utils::*, Celeste};
+
+use crate::{structures::*, utils::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -81,7 +81,7 @@ impl Balloon {
             ObjectType::Balloon(p) => p.clone(),
             _ => unreachable!(),
         };
-        let mut this = tref.borrow_mut();
+        let this = tref.borrow_mut();
         if obj.spr == 22 {
             celeste.mem.spr(
                 (13.0 + (this.offset * 8.0) % 3.0) as u8,

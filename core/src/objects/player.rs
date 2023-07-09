@@ -1,11 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use rand::Rng;
+
 
 use crate::utils::mid;
 use crate::DeadParticle;
-use crate::{memory::Memory, structures::*, utils::*, Celeste};
+use crate::{structures::*, utils::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]

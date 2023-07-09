@@ -1,16 +1,16 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use rand::Rng;
 
-use crate::utils::mid;
-use crate::{memory::Memory, structures::*, utils::*, Celeste};
+
+
+use crate::{structures::*, utils::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Key {}
 impl Key {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },

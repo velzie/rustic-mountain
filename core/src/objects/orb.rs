@@ -8,7 +8,7 @@ pub struct Orb {
     spr: f32,
 }
 impl Orb {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -29,12 +29,12 @@ impl Orb {
             name: "Orb",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    fn update(obj: &mut Object, _celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Orb(p) => p.clone(),
             _ => unreachable!(),
         };
-        let mut this = tref.borrow_mut();
+        let _this = tref.borrow_mut();
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);

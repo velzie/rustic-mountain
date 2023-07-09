@@ -20,7 +20,7 @@ struct ChestParticle {
     spd: f32,
 }
 impl BigChest {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -45,7 +45,7 @@ impl BigChest {
             name: "BigChest",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {}
+    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::BigChest(p) => p.clone(),
@@ -62,7 +62,7 @@ impl BigChest {
                         ObjectType::Player(p) => p.clone(),
                         _ => unreachable!(),
                     };
-                    let mut player = pref.borrow_mut();
+                    let _player = pref.borrow_mut();
                     celeste.max_djump = 2;
                     if playerobj.is_solid(0.0, 1.0, celeste) {
                         // music -1 500 7

@@ -3,7 +3,6 @@ use std::{cell::RefCell, rc::Rc};
 // #[macro_use]
 
 use crate::{
-    memory::Memory,
     objects::{
         balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall,
         fallfloor::FallFloor, flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key,
@@ -163,7 +162,7 @@ impl Object {
                         }
                     }
                 }
-                Err(_) => {}
+                Err(_) => {} // println!("couldn't borrow {} from {}", &name, &obj.name),
             };
         }
         None

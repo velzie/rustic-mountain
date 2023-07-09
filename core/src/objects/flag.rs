@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use rand::Rng;
+
 
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
@@ -38,7 +38,7 @@ impl Flag {
             name: "Flag",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {}
+    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Flag(p) => p.clone(),

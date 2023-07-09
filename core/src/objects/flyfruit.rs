@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use rand::Rng;
 
-use crate::utils::mid;
-use crate::{memory::Memory, structures::*, utils::*, Celeste};
+
+
+use crate::{structures::*, utils::*, Celeste};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ pub struct FlyFruit {
     start: f32,
 }
 impl FlyFruit {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -61,7 +61,7 @@ impl FlyFruit {
             ObjectType::FlyFruit(p) => p.clone(),
             _ => unreachable!(),
         };
-        let mut this = tref.borrow_mut();
+        let this = tref.borrow_mut();
         obj.draw_sprite(celeste);
         for i in [-6, 6] {
             celeste.mem.spr(

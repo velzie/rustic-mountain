@@ -6,12 +6,12 @@ pub mod objects;
 pub mod structures;
 #[macro_use]
 pub mod utils;
-use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
+use std::{cell::RefCell, rc::Rc, vec};
 
 use memory::Memory;
 use objects::{
     balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall, fallfloor::FallFloor,
-    flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key, platform::Platform, player::Player,
+    flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key, platform::Platform,
     playerspawn::PlayerSpawn, roomtitle::RoomTitle, spring::Spring,
 };
 use serde::{Deserialize, Serialize};
@@ -57,7 +57,7 @@ impl Celeste {
             })
         }
         let mut particles = vec![];
-        for i in 0..24 {
+        for _i in 0..24 {
             let size: f32 = mem.rng.gen_range(0.0..1.25);
             particles.push(Particle {
                 x: mem.rng.gen_range(0.0..128.0),

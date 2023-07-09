@@ -8,7 +8,7 @@ pub struct RoomTitle {
     delay: i32,
 }
 impl RoomTitle {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -29,7 +29,7 @@ impl RoomTitle {
             name: "Orb",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {}
+    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::RoomTitle(p) => p.clone(),

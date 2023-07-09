@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use rand::Rng;
 
-use crate::utils::mid;
-use crate::{memory::Memory, structures::*, utils::*, Celeste};
+
+
+use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -14,7 +14,7 @@ pub struct Spring {
     delay: u8,
 }
 impl Spring {
-    pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
+    pub fn init(_celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
@@ -27,7 +27,7 @@ impl Spring {
                 h: 8.0,
             },
             flip: FlipState { x: false, y: false },
-            solids: false,
+            solids: true,
             collidable: true,
             obj_type: ObjectType::Spring(Rc::new(RefCell::new(Self {
                 hide_in: 0,
@@ -84,6 +84,8 @@ impl Spring {
                                 _ => unreachable!(),
                             };
                             let mut floor = fref.borrow_mut();
+                            this.hide_in = 15; // TODO: innacuracy: break_floor doesn't hide it
+                                               // because then they would both have a mut ref, impossible in safe rust
                             floor.break_floor(&mut floorobj, celeste);
                         }
                         // psfx 8
@@ -110,7 +112,7 @@ impl Spring {
             ObjectType::Spring(p) => p.clone(),
             _ => unreachable!(),
         };
-        let mut this = tref.borrow_mut();
+        let _this = tref.borrow_mut();
 
         obj.draw_sprite(celeste);
     }
