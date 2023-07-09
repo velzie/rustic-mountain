@@ -5,9 +5,10 @@ use std::{cell::RefCell, rc::Rc};
 use crate::{
     memory::Memory,
     objects::{
-        balloon::Balloon, bigchest::BigChest, fakewall::FakeWall, fallfloor::FallFloor, flag::Flag,
-        flyfruit::FlyFruit, fruit::Fruit, lifeup::LifeUp, platform::Platform, player::Player,
-        playerspawn::PlayerSpawn, smoke::Smoke, spring::Spring,
+        balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall,
+        fallfloor::FallFloor, flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key,
+        lifeup::LifeUp, platform::Platform, player::Player, playerspawn::PlayerSpawn, smoke::Smoke,
+        spring::Spring,
     },
     utils::*,
     Celeste,
@@ -234,4 +235,6 @@ pub enum ObjectType {
     FlyFruit(Rc<RefCell<FlyFruit>>),
     LifeUp(Rc<RefCell<LifeUp>>),
     FakeWall(Rc<RefCell<FakeWall>>),
+    Key(Rc<RefCell<Key>>),
+    Chest(Rc<RefCell<Chest>>),
 }

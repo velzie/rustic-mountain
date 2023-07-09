@@ -10,9 +10,9 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use memory::Memory;
 use objects::{
-    balloon::Balloon, bigchest::BigChest, fakewall::FakeWall, fallfloor::FallFloor, flag::Flag,
-    flyfruit::FlyFruit, fruit::Fruit, platform::Platform, player::Player, playerspawn::PlayerSpawn,
-    spring::Spring,
+    balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall, fallfloor::FallFloor,
+    flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key, platform::Platform, player::Player,
+    playerspawn::PlayerSpawn, spring::Spring,
 };
 use serde::{Deserialize, Serialize};
 use structures::*;
@@ -249,19 +249,19 @@ impl Celeste {
                 let y = j as f32 * 8.0;
                 match match tile {
                     1 => Some(PlayerSpawn::init(self, x, y)),
-                    // 8 => key
                     11 | 12 => Some(Platform::init(self, x, y, tile)),
                     18 => Some(Spring::init(self, x, y)),
-                    // 20 => chest
                     22 => Some(Balloon::init(self, x, y)),
                     23 => Some(FallFloor::init(self, x, y)),
-                    26 | 64 | 28 => {
+                    26 | 64 | 28 | 8 | 20 => {
                         if self.got_fruit.len() > self.level as usize
                             && self.got_fruit[self.level as usize]
                         {
                             None
                         } else {
                             Some(match tile {
+                                8 => Key::init(self, x, y),
+                                20 => Chest::init(self, x, y),
                                 26 => Fruit::init(self, x, y),
                                 64 => FakeWall::init(self, x, y),
                                 28 => FlyFruit::init(self, x, y),
@@ -317,18 +317,6 @@ impl Celeste {
         }
         return false;
     }
-    //     function spikes_at(x1,y1,x2,y2,xspd,yspd)
-    //  for i=max(0,x1\8),min(15,x2/8) do
-    //   for j=max(0,y1\8),min(15,y2/8) do
-    //    if ({[17]=yspd>=0 and y2%8>=6,
-    //     [27]=yspd<=0 and y1%8<=2,
-    //     [43]=xspd<=0 and x1%8<=2,
-    //     [59]=xspd>=0 and x2%8>=6})[tile_at(i,j)] then
-    //     return true
-    //    end
-    //   end
-    //  end
-    // end
 }
 #[derive(Serialize, Deserialize)]
 

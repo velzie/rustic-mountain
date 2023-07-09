@@ -124,29 +124,6 @@ impl Memory {
             }
             self.draw_circ(xc as i32, yc as i32, x as i32, y as i32, c);
         }
-        // let mut j = -r / 2.0;
-        // loop {
-        //     let mut i = -r / 2.0;
-        //     loop {
-        //         if (((j as f32).powf(2.0) + (i as f32).powf(2.0)) as f32) > r as f32 {
-        //             continue;
-        //         }
-        //         let px = (x as f32 + r / 2.0 + i) as u8;
-        //         let py = (y as f32 + r / 2.0 + j) as u8;
-        //         if px > 127 || py > 127 {
-        //             continue;
-        //         }
-        //         self.gset(col, px, py);
-        //         i += 1.0;
-        //         if i > r / 2.0 {
-        //             break;
-        //         }
-        //     }
-        //     j += 1.0;
-        //     if j > r / 2.0 {
-        //         break;
-        //     }
-        // }
     }
     fn draw_circ(&mut self, xc: i32, yc: i32, x: i32, y: i32, c: u8) {
         self.rectfill(
