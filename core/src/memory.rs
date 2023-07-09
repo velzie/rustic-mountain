@@ -227,6 +227,9 @@ impl Memory {
     }
 
     pub fn mget(&self, x: u8, y: u8) -> u8 {
+        if y == 64 {
+            return 0; //???
+        }
         let ind = x as usize + y as usize * 128;
         if ind < 4096 {
             self.map[ind]

@@ -12,7 +12,7 @@ use memory::Memory;
 use objects::{
     balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall, fallfloor::FallFloor,
     flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key, platform::Platform, player::Player,
-    playerspawn::PlayerSpawn, spring::Spring,
+    playerspawn::PlayerSpawn, roomtitle::RoomTitle, spring::Spring,
 };
 use serde::{Deserialize, Serialize};
 use structures::*;
@@ -36,6 +36,8 @@ pub struct Celeste {
     pub dead_particles: Vec<DeadParticle>,
     pub delay_restart: u8,
     pub shake: u8,
+    pub seconds: u64,
+    pub minutes: u64,
     pub clouds: Vec<Cloud>,
 }
 
@@ -75,6 +77,8 @@ impl Celeste {
             max_djump: 1,
             deaths: 0,
             frames: 0,
+            seconds: 0,
+            minutes: 0,
             level: 0,
             has_key: false,
             has_dashed: false,
@@ -93,6 +97,13 @@ impl Celeste {
     // pub fn load_level();
     pub fn next_tick(&mut self) {
         self.frames += 1;
+
+        if self.level < 31 {
+            self.seconds += self.frames / 30;
+            self.minutes += self.seconds / 60;
+            self.seconds %= 60;
+        }
+        self.frames %= 30;
 
         if self.freeze > 0 {
             self.freeze -= 1;
@@ -187,6 +198,9 @@ impl Celeste {
             2, //2
         );
         for i in 0..self.objects.len() {
+            if i >= self.objects.len() {
+                break;
+            }
             let v = self.objects[i].clone();
             v.borrow_mut().draw(self);
         }
@@ -283,6 +297,11 @@ impl Celeste {
                 //
             }
         }
+        if true {
+            // not title screen
+            let obj = RoomTitle::init(self, 0.0, 0.0);
+            self.objects.push(Rc::new(RefCell::new(obj)));
+        }
     }
     pub fn tile_at(&self, x: f32, y: f32) -> u8 {
         return self.mem.mget(
@@ -316,6 +335,23 @@ impl Celeste {
             i += 1;
         }
         return false;
+    }
+}
+pub fn draw_time(celeste: &mut Celeste, x: i32, y: i32) {
+    celeste.mem.rectfill(x, y, x + 33, y + 7, 0);
+    let time = format!(
+        "{}:{}:{}",
+        two_digit_str(celeste.minutes / 60),
+        two_digit_str(celeste.minutes % 60),
+        two_digit_str(celeste.seconds)
+    );
+    celeste.mem.print(&time, x + 1, y + 1, 7);
+}
+fn two_digit_str(n: u64) -> String {
+    if n < 10 {
+        format!("0{}", n)
+    } else {
+        format!("{}", n)
     }
 }
 #[derive(Serialize, Deserialize)]

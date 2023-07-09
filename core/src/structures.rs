@@ -7,8 +7,8 @@ use crate::{
     objects::{
         balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall,
         fallfloor::FallFloor, flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key,
-        lifeup::LifeUp, message::Message, platform::Platform, player::Player,
-        playerspawn::PlayerSpawn, smoke::Smoke, spring::Spring,
+        lifeup::LifeUp, message::Message, orb::Orb, platform::Platform, player::Player,
+        playerspawn::PlayerSpawn, roomtitle::RoomTitle, smoke::Smoke, spring::Spring,
     },
     utils::*,
     Celeste,
@@ -238,4 +238,6 @@ pub enum ObjectType {
     Key(Rc<RefCell<Key>>),
     Chest(Rc<RefCell<Chest>>),
     Message(Rc<RefCell<Message>>),
+    RoomTitle(Rc<RefCell<RoomTitle>>),
+    Orb(Rc<RefCell<Orb>>),
 }
