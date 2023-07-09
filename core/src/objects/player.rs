@@ -151,30 +151,12 @@ impl Player {
             if obj.spd.x.abs() != 0f32 {
                 obj.flip.x = obj.spd.x < 0f32;
             }
-            // log(self.spd.x);
-
-            // if h_input == 0 &&
-
-            //    -- facing direction
-            //    if this.spd.x~=0 then
-            //     this.flip.x=this.spd.x<0
-            //    end
-            // y movement
 
             let mut maxfall = 2.0;
 
             if h_input != 0 && obj.is_solid((h_input * 2) as f32, 0f32, celeste) {
                 maxfall = 0.4;
             }
-            //    -- wall slide
-            //    if h_input~=0 and this.is_solid(h_input,0) and not this.is_ice(h_input,0) then
-            //     maxfall=0.4
-            //     -- wall slide smoke
-            //     if rnd()<0.2 then
-            //      this.init_smoke(h_input*6)
-            //     end
-            //    end
-
             if !on_ground {
                 obj.spd.y = appr(
                     obj.spd.y,
@@ -210,36 +192,12 @@ impl Player {
                 }
             }
 
-            //    -- jump
-            //    if this.jbuffer>0 then
-            //     if this.grace>0 then
-            //      -- normal jump
-            //      psfx"1"
-            //      this.jbuffer=0
-            //      this.grace=0
-            //      this.spd.y=-2
-            //      this.init_smoke(0,4)
-            //     else
-            //      -- wall jump
-            //      local wall_dir=(this.is_solid(-3,0) and -1 or this.is_solid(3,0) and 1 or 0)
-            //      if wall_dir~=0 then
-            //       psfx"2"
-            //       this.jbuffer=0
-            //       this.spd=vector(wall_dir*(-1-maxrun),-2)
-            //       if not this.is_ice(wall_dir*3,0) then
-            //        -- wall jump smoke
-            //        this.init_smoke(wall_dir*6)
-            //       end
-            //      end
-            //     end
-            //    end
             if obj.pos.y < -4.0 {
                 celeste.next_room();
             }
             let d_full = 5.0;
             let d_half = 3.5355339059;
             if this.djump > 0 && dash {
-                // (celeste.mem.logger)("??");
                 obj.init_smoke(celeste, 0.0, 0.0);
                 this.djump -= 1;
                 this.dash_time = 4;
@@ -275,63 +233,16 @@ impl Player {
                     },
                 };
 
-                //psfx 3
                 celeste.freeze = 2;
                 celeste.shake = 6;
-                // celeste.s
 
                 this.dash_target_x = 2.0 * sign(obj.spd.x);
                 this.dash_target_y = (if obj.spd.y >= 0.0 { 2.0 } else { 1.5 }) * sign(obj.spd.y);
                 this.dash_accel_x = if obj.spd.y == 0.0 { 1.5 } else { 1.06066017177 };
                 this.dash_accel_y = if obj.spd.x == 0.0 { 1.5 } else { 1.06066017177 };
-                // this.dash_accel_x=this.spd.y==0 and 1.5 or 1.06066017177 -- 1.5 * sqrt()
-                //     this.dash_accel_y=this.spd.x==0 and 1.5 or 1.06066017177
             }
         }
-        //    -- dash
-        //    local d_full=5
-        //    local d_half=3.5355339059 -- 5 * sqrt(2)
 
-        //    if this.djump>0 and dash then
-        //     this.init_smoke()
-        //     this.djump-=1
-        //     this.dash_time=4
-        //     has_dashed=true
-        //     this.dash_effect_time=10
-        //     -- vertical input
-        //     local v_input=btn(⬆️) and -1 or btn(⬇️) and 1 or 0
-        //     -- calculate dash speeds
-        //     this.spd=vector(
-        //      h_input~=0 and h_input*(v_input~=0 and d_half or d_full) or (v_input~=0 and 0 or this.flip.x and -1 or 1),
-        //      v_input~=0 and v_input*(h_input~=0 and d_half or d_full) or 0
-        //     )
-        //     -- effects
-        //     psfx"3"
-        //     freeze=2
-        //     shake=6
-        //     -- dash target speeds and accels
-        //     this.dash_target_x=2*sign(this.spd.x)
-        //     this.dash_target_y=(this.spd.y>=0 and 2 or 1.5)*sign(this.spd.y)
-        //     this.dash_accel_x=this.spd.y==0 and 1.5 or 1.06066017177 -- 1.5 * sqrt()
-        //     this.dash_accel_y=this.spd.x==0 and 1.5 or 1.06066017177
-        //    elseif this.djump<=0 and dash then
-        //     -- failed dash smoke
-        //     psfx"9"
-        //     this.init_smoke()
-        //    end
-        //   end
-
-        //   -- animation
-        //   this.spr_off+=0.25
-        //   this.spr = not on_ground and (this.is_solid(h_input,0) and 5 or 3) or  -- wall slide or mid air
-        //    btn(⬇️) and 6 or -- crouch
-        //    btn(⬆️) and 7 or -- look up
-        //    this.spd.x~=0 and h_input~=0 and 1+this.spr_off%4 or 1 -- walk or stand
-
-        //   -- exit level off the top (except summit)
-        //   if this.y<-4 and level_index()<31 then
-        //    next_room()
-        //   end
         this.spr_off += 0.25;
         obj.spr = if !on_ground {
             if obj.is_solid(h_input as f32 * 2.0, 0.0, celeste) {
@@ -353,31 +264,6 @@ impl Player {
             }
         };
         this.was_on_ground = on_ground;
-        //   -- was on the ground
-        //   this.was_on_ground=on_ground
-        //  end,
-
-        //  draw=function(this)
-        //   -- clamp in screen
-        //   local clamped=mid(this.x,-1,121)
-        //   if this.x~=clamped then
-        //    this.x=clamped
-        //    this.spd.x=0
-        //   end
-        //   -- draw player hair and sprite
-        //   set_hair_color(this.djump)
-        //   draw_hair(this)
-        //   draw_obj_sprite(this)
-        //   unset_hair_color()
-        //  end
-        // }
-        // if celeste.mem.buttons[0] {
-        //     self.pos.x -= 1f32;
-        // }
-        // if celeste.mem.buttons[1] {
-        //     self.pos.x += 1f32;
-        // }
-        // self
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
@@ -385,32 +271,9 @@ impl Player {
             _ => unreachable!(),
         };
         let mut this = tref.borrow_mut();
-        let clamped = mid(obj.pos.x, -1.0, 121.0);
-        if obj.pos.x != clamped {
-            obj.pos.x = clamped;
-            obj.spd.x = 0.0;
-        }
+        let djump = this.djump.clone();
 
-        // self.spr += 1;
-        let haircol = if this.djump == 1 { 8 } else { 12 };
-        celeste.mem.pal(8, haircol);
-
-        let mut first = Vector {
-            x: obj.pos.x + if obj.flip.x { 6.0 } else { 2.0 },
-            y: obj.pos.y + if celeste.mem.buttons[3] { 4.0 } else { 3.0 },
-        };
-        // celeste.mem.circfill(50, 50, 2.into(), 3);
-        let mut last = &mut first;
-        for (i, h) in this.hair.iter_mut().enumerate() {
-            h.x += (last.x - h.x) / 1.5;
-            h.y += (last.y + 0.5 - h.y) / 1.5;
-            celeste
-                .mem
-                .circfill(h.x as u8, h.y as u8, (3 - i).min(2).max(1) as i8, haircol);
-            last = h;
-        }
-        obj.draw_sprite(celeste);
-        celeste.mem.pal(8, 8);
+        draw_player(obj, celeste, &mut this.hair, djump);
     }
     pub fn kill(&mut self, obj: &mut Object, celeste: &mut Celeste) {
         obj.destroy_self(celeste);
@@ -432,4 +295,38 @@ impl Player {
         }
         celeste.delay_restart = 15;
     }
+}
+pub fn draw_player(obj: &mut Object, celeste: &mut Celeste, hair: &mut Vec<Vector>, djump: u8) {
+    let clamped = mid(obj.pos.x, -1.0, 121.0);
+    if obj.pos.x != clamped {
+        obj.pos.x = clamped;
+        obj.spd.x = 0.0;
+    }
+
+    let haircol = if djump == 1 {
+        8
+    } else if djump == 0 {
+        12
+    } else if celeste.frames % 6 < 3 {
+        7
+    } else {
+        11
+    };
+    celeste.mem.pal(8, haircol);
+
+    let mut first = Vector {
+        x: obj.pos.x + if obj.flip.x { 6.0 } else { 2.0 },
+        y: obj.pos.y + if celeste.mem.buttons[3] { 4.0 } else { 3.0 },
+    };
+    let mut last = &mut first;
+    for (i, h) in hair.iter_mut().enumerate() {
+        h.x += (last.x - h.x) / 1.5;
+        h.y += (last.y + 0.5 - h.y) / 1.5;
+        celeste
+            .mem
+            .circfill(h.x as u8, h.y as u8, (3 - i).min(2).max(1) as i8, haircol);
+        last = h;
+    }
+    obj.draw_sprite(celeste);
+    celeste.mem.pal(8, 8);
 }

@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{structures::*, Celeste};
 
-use super::player::Player;
+use super::player::{draw_player, Player};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -11,6 +11,8 @@ pub struct PlayerSpawn {
     state: u8,
     delay: i8,
     djump: u8,
+
+    hair: Vec<Vector>,
 }
 impl PlayerSpawn {
     pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
@@ -33,6 +35,7 @@ impl PlayerSpawn {
                 state: 0,
                 djump: celeste.max_djump,
                 target: y,
+                hair: vec![Vector { x, y: 128.0 }; 4],
             }))),
             draw: Self::draw,
             update: Self::update,
@@ -47,8 +50,7 @@ impl PlayerSpawn {
         };
 
         let mut this = tref.borrow_mut();
-        if this.state == 0 {
-            //&& obj.pos.y < this.target + 16.0
+        if this.state == 0 && obj.pos.y < this.target + 16.0 {
             this.state = 1;
             this.delay = 3;
         } else if this.state == 1 {
@@ -78,6 +80,12 @@ impl PlayerSpawn {
         }
     }
     fn draw(obj: &mut Object, celeste: &mut Celeste) {
-        obj.draw_sprite(celeste);
+        let tref = match &mut obj.obj_type {
+            ObjectType::PlayerSpawn(p) => p.clone(),
+            _ => unreachable!(),
+        };
+        let mut this = tref.borrow_mut();
+        let djump = this.djump.clone();
+        draw_player(obj, celeste, &mut this.hair, djump)
     }
 }

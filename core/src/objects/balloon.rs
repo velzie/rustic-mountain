@@ -58,11 +58,13 @@ impl Balloon {
                         _ => unreachable!(),
                     };
                     let mut player = pref.borrow_mut();
-                    //psfx 6
-                    obj.init_smoke(celeste, 0.0, 0.0);
-                    player.djump = celeste.max_djump;
-                    obj.spr = 0;
-                    this.timer = 60.0;
+                    if player.djump < celeste.max_djump {
+                        //psfx 6
+                        obj.init_smoke(celeste, 0.0, 0.0);
+                        player.djump = celeste.max_djump;
+                        obj.spr = 0;
+                        this.timer = 60.0;
+                    }
                 }
                 None => (),
             }
