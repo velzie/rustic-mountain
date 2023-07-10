@@ -1,7 +1,5 @@
 use std::{cell::RefCell, rc::Rc};
 
-
-
 use crate::{structures::*, utils::sign, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -24,12 +22,12 @@ impl FakeWall {
             collidable: true,
             solids: false,
             obj_type: ObjectType::FakeWall(Rc::new(RefCell::new(Self {}))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "FakeWall",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         // hitbox is mutated during the duration of update(). not sure why? it makes check() more
         // generous i guess
         obj.hitbox = Rectangle {
@@ -81,7 +79,7 @@ impl FakeWall {
             h: 16.0,
         };
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         celeste
             .mem
             .spr(64, obj.pos.x as i32, obj.pos.y as i32, None);

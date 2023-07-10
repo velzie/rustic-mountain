@@ -28,13 +28,13 @@ impl Message {
                 index: 0.0,
                 last: 0.0,
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "FakeWall",
         }
     }
-    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let text = "-- celeste mountain --#this memorial to those# perished on the climb";
         let tref = match &mut obj.obj_type {
             ObjectType::Message(p) => p.clone(),

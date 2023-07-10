@@ -24,13 +24,13 @@ impl RoomTitle {
             collidable: false,
             solids: false,
             obj_type: ObjectType::RoomTitle(Rc::new(RefCell::new(Self { delay: 5 }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Orb",
         }
     }
-    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::RoomTitle(p) => p.clone(),
             _ => unreachable!(),

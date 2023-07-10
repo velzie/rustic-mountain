@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
-
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -34,12 +31,12 @@ impl Spring {
                 hide_for: 0,
                 delay: 0,
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Spring",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Spring(p) => p.clone(),
             _ => unreachable!(),
@@ -107,7 +104,7 @@ impl Spring {
             }
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Spring(p) => p.clone(),
             _ => unreachable!(),

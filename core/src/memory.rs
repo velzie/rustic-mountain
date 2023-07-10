@@ -1,6 +1,4 @@
-use crate::{
-    structures::{FlipState, Vector},
-};
+use crate::structures::{FlipState, Vector};
 use rand::{rngs::ThreadRng, thread_rng};
 use serde::{Deserialize, Serialize};
 
@@ -77,13 +75,11 @@ impl Memory {
                 if flip.y {
                     cj = 7 - j;
                 }
-                let color = self.pallete[self.sprites[((sprite as usize % 16) * 8)
-                    + (((sprite as usize / 16) * 8 * 128) + ci + (cj * 128))]
-                    as usize]
-                    .clone();
+                let color = self.sprites[((sprite as usize % 16) * 8)
+                    + (((sprite as usize / 16) * 8 * 128) + ci + (cj * 128))];
 
-                if !color.transparent {
-                    self.pset(color.color, x + i as i32, y + j as i32);
+                if !self.pallete[color as usize].transparent {
+                    self.pset(color, x + i as i32, y + j as i32);
                 }
             }
         }
@@ -123,7 +119,7 @@ impl Memory {
             self.draw_circ(xc as i32, yc as i32, x as i32, y as i32, c);
         }
     }
-    fn draw_circ(&mut self, xc: i32, yc: i32, x: i32, y: i32, c: u8) {
+    pub fn draw_circ(&mut self, xc: i32, yc: i32, x: i32, y: i32, c: u8) {
         self.rectfill(
             (xc - x).into(),
             (yc + y).into(),
@@ -199,6 +195,13 @@ impl Memory {
     pub fn palt(&mut self, index: usize, transparent: bool) {
         self.pallete[index].transparent = transparent;
     }
+    pub fn pal_reset(&mut self) {
+        for i in 0..self.pallete.len() {
+            self.pallete[i].color = i as u8;
+            self.pallete[i].transparent = false;
+        }
+        self.pallete[0].transparent = true;
+    }
     pub fn print(&mut self, text: &str, x: i32, y: i32, col: u8) {
         for (c, chr) in text.char_indices() {
             let char_index = chr as usize;
@@ -216,12 +219,13 @@ impl Memory {
         }
     }
     pub fn pset(&mut self, col: u8, mut x: i32, mut y: i32) {
+        let c = &self.pallete[col as usize];
         x += self.camera.x as i32;
         y += self.camera.y as i32;
         if x < 0 || y < 0 || x >= 128 || y >= 128 {
             return;
         }
-        self.graphics[x as usize + y as usize * 128] = col;
+        self.graphics[x as usize + y as usize * 128] = c.color;
     }
 
     pub fn mget(&self, x: u8, y: u8) -> u8 {

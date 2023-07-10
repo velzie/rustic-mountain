@@ -1,32 +1,34 @@
-#[macro_use]
-extern crate lazy_static;
-
+pub mod assign_skipped_consts;
 pub mod memory;
 pub mod objects;
 pub mod structures;
-#[macro_use]
 pub mod utils;
 use std::{cell::RefCell, rc::Rc, vec};
 
+use assign_skipped_consts::assign_skipped_consts;
 use memory::Memory;
 use objects::{
     balloon::Balloon, bigchest::BigChest, chest::Chest, fakewall::FakeWall, fallfloor::FallFloor,
-    flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key, platform::Platform,
-    playerspawn::PlayerSpawn, roomtitle::RoomTitle, spring::Spring,
+    flag::Flag, flyfruit::FlyFruit, fruit::Fruit, key::Key, lifeup::LifeUp, message::Message,
+    platform::Platform, player::Player, playerspawn::PlayerSpawn, roomtitle::RoomTitle,
+    spring::Spring,
 };
 use serde::{Deserialize, Serialize};
+use serde_json;
+use serde_json::json;
 use structures::*;
 
 use rand::prelude::*;
-use utils::sin;
-#[derive(Serialize)]
+use utils::{max, sin};
+#[derive(Serialize, Deserialize)]
 pub struct Celeste {
     pub mem: Memory,
+    // #[serde(skip)]
     pub objects: Vec<Rc<RefCell<Object>>>,
     pub got_fruit: Vec<bool>,
     pub max_djump: u8,
-    pub deaths: u8,
-    pub frames: u64,
+    pub deaths: u64,
+    pub frames: u8,
     pub room: Vector,
     pub level: u8,
     pub has_dashed: bool,
@@ -36,9 +38,14 @@ pub struct Celeste {
     pub dead_particles: Vec<DeadParticle>,
     pub delay_restart: u8,
     pub shake: u8,
-    pub seconds: u64,
+    pub seconds: u8,
     pub minutes: u64,
     pub clouds: Vec<Cloud>,
+    pub start_game_flash: f32,
+    pub music_timer: i32,
+    pub start_game: bool,
+    pub flash_bg: bool,
+    pub new_bg: bool,
 }
 
 impl Celeste {
@@ -88,9 +95,15 @@ impl Celeste {
             dead_particles: vec![],
             delay_restart: 0,
             shake: 0,
+            start_game: false,
+            music_timer: 0,
+            start_game_flash: 0.0,
+            flash_bg: false,
+
+            new_bg: false,
         };
-        cel.load_room(0, 0);
-        // cel.mem.fontatlas.reverse();
+        cel.title_screen();
+        // cel.load_room(0, 0);
         cel
     }
 
@@ -100,7 +113,7 @@ impl Celeste {
 
         if self.level < 31 {
             self.seconds += self.frames / 30;
-            self.minutes += self.seconds / 60;
+            self.minutes += (self.seconds / 60) as u64;
             self.seconds %= 60;
         }
         self.frames %= 30;
@@ -128,7 +141,9 @@ impl Celeste {
             }
         }
 
-        for i in 0..self.objects.len() {
+        let mut i = 0;
+        let mut lastlen = self.objects.len();
+        loop {
             if i >= self.objects.len() {
                 break;
             }
@@ -140,41 +155,93 @@ impl Celeste {
                 y: obj.spd.y,
             };
             drop(obj);
-            // dbg!();
 
             v.borrow_mut().do_move(self, spd.x, spd.y, 0f32);
             v.borrow_mut().update(self);
+            i += 1;
         }
-
+        if self.is_title() {
+            if self.start_game {
+                self.start_game_flash -= 1.0;
+                if self.start_game_flash <= -30.0 {
+                    self.begin_game();
+                }
+            } else if self.mem.buttons[4] || self.mem.buttons[5] {
+                // music -1
+                self.start_game_flash = 50.0;
+                self.start_game = true;
+                // sfx 38
+            }
+        }
         // let graph = &mut rself.borrow_mut().mem.graphics;
         // for i in 0..128 * 128 {
         //     // graphics[(i % 15) as u8] = i as ;
         // }
     }
+    pub fn is_title(&self) -> bool {
+        self.level == 32
+    }
+    pub fn begin_game(&mut self) {
+        self.max_djump = 1;
+        self.deaths = 0;
+        self.frames = 0;
+        self.seconds = 0;
+        self.minutes = 0;
+        self.music_timer = 0;
+        // music 007
+        self.level = 0;
+        self.load_room(0, 0);
+    }
     pub fn draw(&mut self) {
         if self.freeze > 0 {
             return;
         }
-        for i in 0..128 * 128 {
-            self.mem.graphics[i] = 0; // (i % 15) as u8;
+
+        self.mem.pal_reset();
+
+        if self.is_title() && self.start_game {
+            for i in 1..16 {
+                self.mem.pal(
+                    i,
+                    if self.start_game_flash <= 10.0 {
+                        f32::ceil(max(self.start_game_flash, 0.0) / 5.0) as u8
+                    } else {
+                        if self.frames % 10 < 5 {
+                            7
+                        } else {
+                            i as u8
+                        }
+                    },
+                );
+            }
         }
+
         //clearing screen
-        // TODO:
-        // title screen
-        // reset palette
-        self.mem.pal(8, 8);
-        for cloud in &mut self.clouds {
-            cloud.x += cloud.spd;
-            self.mem.rectfill(
-                cloud.x,
-                cloud.y,
-                cloud.x + cloud.w,
-                cloud.y + 16 - (cloud.w as f32 * 0.1875) as i32,
-                1,
-            );
-            if cloud.x > 128 {
-                cloud.x = -cloud.w;
-                cloud.y = self.mem.rng.gen_range(0..120);
+        let bg_col = if self.flash_bg {
+            self.frames as u8 / 5
+        } else {
+            if self.new_bg {
+                2
+            } else {
+                0
+            }
+        };
+        self.mem.rrectfill(-1, -1, 128, 128, bg_col);
+
+        if !self.is_title() {
+            for cloud in &mut self.clouds {
+                cloud.x += cloud.spd;
+                self.mem.rectfill(
+                    cloud.x,
+                    cloud.y,
+                    cloud.x + cloud.w,
+                    cloud.y + 16 - (cloud.w as f32 * 0.1875) as i32,
+                    1,
+                );
+                if cloud.x > 128 {
+                    cloud.x = -cloud.w;
+                    cloud.y = self.mem.rng.gen_range(0..120);
+                }
             }
         }
 
@@ -239,11 +306,27 @@ impl Celeste {
             }
         }
         self.dead_particles.retain(|f| f.t > 0.0);
+
+        if self.is_title() {
+            self.mem.print("z+x", 58, 80, 5);
+            // self.mem.print("(rust edition)", 41, 91, 5);
+            self.mem.print("maddy thorson", 42, 96, 5);
+            self.mem.print("noel berry", 46, 102, 5);
+        }
+
+        // todo: summit blinds
     }
     pub fn next_room(&mut self) {
         // do sound at some point
         self.level += 1;
         self.load_room(self.level % 8, self.level / 8);
+    }
+    pub fn title_screen(&mut self) {
+        self.frames = 0;
+        self.start_game_flash = 0.0;
+        self.level = 32;
+        // music
+        self.load_room(7, 3);
     }
     pub fn load_room(&mut self, x: u8, y: u8) {
         self.objects.clear();
@@ -297,8 +380,7 @@ impl Celeste {
                 //
             }
         }
-        if true {
-            // not title screen
+        if !self.is_title() {
             let obj = RoomTitle::init(self, 0.0, 0.0);
             self.objects.push(Rc::new(RefCell::new(obj)));
         }
@@ -336,6 +418,33 @@ impl Celeste {
         }
         return false;
     }
+
+    pub fn save_state(&mut self) -> Result<String, serde_json::Error> {
+        // let mut holders = vec![];
+        // for i in 0..self.objects.len() {
+        //     let o = &self.objects[i];
+        //     holders.push(o.borrow());
+        // }
+        //
+        // let refs: Vec<&Object> = holders.iter().map(|f| &**f).collect();
+        // // yes this is stupid.
+        //
+        // let json = json!({
+        //     "state": self,
+        //     "objects":refs,
+        // });
+        // Ok(json.to_string())
+        serde_json::to_string(self)
+    }
+    pub fn load_state(&mut self, json: &str) {
+        let deserialized: Self = serde_json::from_str(json).unwrap();
+        for i in 0..deserialized.objects.len() {
+            let o = &deserialized.objects[i];
+            let mut obj = o.borrow_mut();
+            assign_skipped_consts(&mut obj);
+        }
+        *self = deserialized;
+    }
 }
 pub fn draw_time(celeste: &mut Celeste, x: i32, y: i32) {
     celeste.mem.rectfill(x, y, x + 33, y + 7, 0);
@@ -343,7 +452,7 @@ pub fn draw_time(celeste: &mut Celeste, x: i32, y: i32) {
         "{}:{}:{}",
         two_digit_str(celeste.minutes / 60),
         two_digit_str(celeste.minutes % 60),
-        two_digit_str(celeste.seconds)
+        two_digit_str(celeste.seconds as u64)
     );
     celeste.mem.print(&time, x + 1, y + 1, 7);
 }
@@ -354,6 +463,7 @@ fn two_digit_str(n: u64) -> String {
         format!("{}", n)
     }
 }
+
 #[derive(Serialize, Deserialize)]
 
 pub struct Cloud {

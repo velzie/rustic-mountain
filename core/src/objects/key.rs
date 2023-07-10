@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
-
 use crate::{structures::*, utils::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -26,12 +23,12 @@ impl Key {
             collidable: true,
             solids: false,
             obj_type: ObjectType::Key(Rc::new(RefCell::new(Self {}))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Key",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         obj.spr = (9.5 + sin(celeste.frames as f32 / 30.0)).floor() as u8;
         if celeste.frames == 18 {
             obj.flip.x = !obj.flip.x;
@@ -42,7 +39,7 @@ impl Key {
             obj.destroy_self(celeste);
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);
     }
 }

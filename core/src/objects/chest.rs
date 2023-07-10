@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use rand::Rng;
 
-
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -32,12 +31,12 @@ impl Chest {
                 start: x - 4.0,
                 timer: 20,
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Chest",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         if celeste.has_key {
             let tref = match &mut obj.obj_type {
                 ObjectType::Chest(p) => p.clone(),
@@ -51,7 +50,7 @@ impl Chest {
             }
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);
     }
 }

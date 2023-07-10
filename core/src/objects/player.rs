@@ -1,8 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
 use crate::utils::mid;
 use crate::DeadParticle;
 use crate::{structures::*, utils::*, Celeste};
@@ -30,8 +28,8 @@ pub struct Player {
 impl Player {
     pub fn init(celeste: &mut Celeste, x: f32, y: f32) -> Object {
         Object {
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             pos: Vector { x, y },
             spd: Vector { x: 0.0, y: 0.0 },
             rem: Vector { x: 0.0, y: 0.0 },
@@ -65,7 +63,7 @@ impl Player {
             name: "Player",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Player(p) => p.clone(),
             _ => unreachable!(),
@@ -265,7 +263,7 @@ impl Player {
         };
         this.was_on_ground = on_ground;
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Player(p) => p.clone(),
             _ => unreachable!(),

@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
-
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -28,13 +25,13 @@ impl FallFloor {
             flip: FlipState { x: false, y: false },
             collidable: true,
             obj_type: ObjectType::FallFloor(Rc::new(RefCell::new(Self { state: 0, delay: 0 }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "FallFloor",
             solids: false,
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::FallFloor(p) => p.clone(),
             _ => unreachable!(),
@@ -66,7 +63,7 @@ impl FallFloor {
             }
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::FallFloor(p) => p.clone(),
             _ => unreachable!(),

@@ -40,13 +40,13 @@ impl BigChest {
                 timer: 0.0,
                 particles: vec![],
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "BigChest",
         }
     }
-    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::BigChest(p) => p.clone(),
             _ => unreachable!(),

@@ -29,14 +29,14 @@ impl BaseObject {
             name: "BaseObject",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::BaseObject(p) => p.clone(),
             _ => unreachable!(),
         };
         let mut this = tref.borrow_mut();
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::BaseObject(p) => p.clone(),
             _ => unreachable!(),

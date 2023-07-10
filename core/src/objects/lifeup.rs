@@ -1,7 +1,5 @@
 use std::{cell::RefCell, rc::Rc};
 
-
-
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -30,12 +28,12 @@ impl LifeUp {
                 duration: 30.0,
                 flash: 0.0,
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "LifeUp",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::LifeUp(p) => p.clone(),
             _ => unreachable!(),
@@ -46,7 +44,7 @@ impl LifeUp {
             obj.destroy_self(celeste);
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::LifeUp(p) => p.clone(),
             _ => unreachable!(),

@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
-
 use crate::{structures::*, utils::*, Celeste};
 
 use super::lifeup::LifeUp;
@@ -31,12 +28,12 @@ impl Fruit {
             collidable: true,
             solids: false,
             obj_type: ObjectType::Fruit(Rc::new(RefCell::new(Self { start: y, off: 0.0 }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Fruit",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Fruit(p) => p.clone(),
             _ => unreachable!(),
@@ -47,7 +44,7 @@ impl Fruit {
 
         check_fruit(obj, celeste);
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);
     }
 }

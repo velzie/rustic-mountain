@@ -28,12 +28,12 @@ impl Platform {
                 last: -4.0,
                 dir: if spr == 11 { -1.0 } else { 1.0 },
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Platform",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Platform(p) => p.clone(),
             _ => unreachable!(),
@@ -59,7 +59,7 @@ impl Platform {
         }
         this.last = obj.pos.x;
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Platform(p) => p.clone(),
             _ => unreachable!(),

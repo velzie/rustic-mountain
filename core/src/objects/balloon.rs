@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use rand::Rng;
 
-
 use crate::{structures::*, utils::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -34,12 +33,12 @@ impl Balloon {
                 timer: 0.0,
                 start: y,
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Balloon",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Balloon(p) => p.clone(),
             _ => unreachable!(),
@@ -76,7 +75,7 @@ impl Balloon {
             obj.spr = 22;
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Balloon(p) => p.clone(),
             _ => unreachable!(),

@@ -40,7 +40,7 @@ pub struct FlipState {
     pub x: bool,
     pub y: bool,
 }
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 
 pub struct Object {
     pub pos: Vector,
@@ -54,18 +54,27 @@ pub struct Object {
     pub solids: bool,
 
     pub obj_type: ObjectType,
+    #[serde(skip, default)]
+    pub draw: ObjFunc,
     #[serde(skip)]
-    pub draw: fn(&mut Object, &mut Celeste),
+    pub update: ObjFunc,
+
     #[serde(skip)]
-    pub update: fn(&mut Object, &mut Celeste),
     pub name: &'static str,
 }
+pub struct ObjFunc(pub fn(&mut Object, &mut Celeste));
+impl Default for ObjFunc {
+    fn default() -> Self {
+        ObjFunc(noop)
+    }
+}
+pub fn noop(_: &mut Object, _: &mut Celeste) {}
 impl Object {
     pub fn draw(&mut self, celeste: &mut Celeste) {
-        (self.draw)(self, celeste);
+        (self.draw).0(self, celeste);
     }
     pub fn update(&mut self, celeste: &mut Celeste) {
-        (self.update)(self, celeste);
+        (self.update).0(self, celeste);
     }
     pub fn left(&self) -> f32 {
         self.pos.x + self.hitbox.x

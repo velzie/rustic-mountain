@@ -35,12 +35,12 @@ impl Smoke {
             collidable: false,
             solids: false,
             obj_type: ObjectType::Smoke(Rc::new(RefCell::new(Self { spr: 29.0 }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Smoke",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Smoke(p) => p.clone(),
             _ => unreachable!(),
@@ -52,7 +52,7 @@ impl Smoke {
         }
         obj.spr = this.spr as u8;
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);
     }
 }

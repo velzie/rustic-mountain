@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
-
-
 use crate::{structures::*, utils::*, Celeste};
 
 use serde::{Deserialize, Serialize};
@@ -32,12 +29,12 @@ impl FlyFruit {
             collidable: false,
             solids: false,
             obj_type: ObjectType::FlyFruit(Rc::new(RefCell::new(Self { start: y, off: 0.5 }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "FlyFruit",
         }
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::FlyFruit(p) => p.clone(),
             _ => unreachable!(),
@@ -56,7 +53,7 @@ impl FlyFruit {
 
         check_fruit(obj, celeste);
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::FlyFruit(p) => p.clone(),
             _ => unreachable!(),

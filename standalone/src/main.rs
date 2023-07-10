@@ -54,6 +54,8 @@ pub fn main() {
     canvas.set_draw_color(Color::RGB(0, 255, 255));
     canvas.clear();
     canvas.present();
+
+    let mut savestate: Option<String> = None;
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
         // canvas.set_draw_color(Color::BLUE);
@@ -110,6 +112,18 @@ pub fn main() {
                     }
                     Keycode::F => {
                         engine.next_room();
+                    }
+                    Keycode::E => match engine.save_state() {
+                        Ok(e) => {
+                            println!("{}", e);
+                            savestate = Some(e)
+                        }
+                        Err(e) => panic!("{:?}", e),
+                    },
+                    Keycode::Q => {
+                        if let Some(s) = &savestate {
+                            engine.load_state(s);
+                        }
                     }
                     _ => {}
                 },

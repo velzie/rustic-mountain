@@ -37,13 +37,13 @@ impl PlayerSpawn {
                 target: y,
                 hair: vec![Vector { x, y: 128.0 }; 4],
             }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "PlayerSpawn",
         }
         //sfx 4
     }
-    fn update(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::PlayerSpawn(p) => p.clone(),
             _ => unreachable!(),
@@ -79,7 +79,7 @@ impl PlayerSpawn {
             }
         }
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::PlayerSpawn(p) => p.clone(),
             _ => unreachable!(),

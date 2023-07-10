@@ -24,19 +24,19 @@ impl Orb {
             collidable: false,
             solids: false,
             obj_type: ObjectType::Orb(Rc::new(RefCell::new(Self { spr: 29.0 }))),
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Orb",
         }
     }
-    fn update(obj: &mut Object, _celeste: &mut Celeste) {
+    pub fn update(obj: &mut Object, _celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Orb(p) => p.clone(),
             _ => unreachable!(),
         };
         let _this = tref.borrow_mut();
     }
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         obj.draw_sprite(celeste);
     }
 }

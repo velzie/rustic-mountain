@@ -1,7 +1,5 @@
 use std::{cell::RefCell, rc::Rc};
 
-
-
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
@@ -33,13 +31,13 @@ impl Flag {
                     .fold(0, |acc, x| acc + if *x { 0 } else { 1 }),
                 show: false,
             }))), // score =
-            draw: Self::draw,
-            update: Self::update,
+            draw: ObjFunc(Self::draw),
+            update: ObjFunc(Self::update),
             name: "Flag",
         }
     }
-    fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
-    fn draw(obj: &mut Object, celeste: &mut Celeste) {
+    pub fn update(_obj: &mut Object, _celeste: &mut Celeste) {}
+    pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
         let tref = match &mut obj.obj_type {
             ObjectType::Flag(p) => p.clone(),
             _ => unreachable!(),
