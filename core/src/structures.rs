@@ -171,7 +171,7 @@ impl Object {
                         }
                     }
                 }
-                Err(_) => {} // println!("couldn't borrow {} from {}", &name, &obj.name),
+                Err(_) => (), //println!("couldn't borrow {} from {}", &name, &obj.name),
             };
         }
         None

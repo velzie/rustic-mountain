@@ -8,7 +8,7 @@ ported from [smalleste.p8](https://github.com/CelesteClassic/smalleste/blob/main
 
 ### librustic
 a headless API is exposed through the "core" crate, so you can import it into any rust project, or compile to a shared object for FFI use in any programming language<br>
-this feature is used in [morespriteshorn](https://github.com/CoolElectronics/morespriteshorn) to simulate accurate celeste physics inside of the love2d engine
+this feature is used in [morespriteshorn](https://github.com/CoolElectronics/morespriteshorn) to simulate celeste physics inside of the love2d engine
 
 # DISCLAIMER:
 

@@ -196,6 +196,9 @@ impl Celeste {
         if self.freeze > 0 {
             return;
         }
+        for i in 0..128 * 128 {
+            self.mem.graphics[i] = 0; // (i % 15) as u8;
+        }
 
         self.mem.pal_reset();
 
@@ -264,11 +267,8 @@ impl Celeste {
             16,
             2, //2
         );
-        for i in 0..self.objects.len() {
-            if i >= self.objects.len() {
-                break;
-            }
-            let v = self.objects[i].clone();
+        for v in self.objects.clone() {
+            // cloning is fine here, it's just a vector of pointers
             v.borrow_mut().draw(self);
         }
 
@@ -366,7 +366,8 @@ impl Celeste {
                             })
                         }
                     }
-                    // 86 => message
+
+                    86 => Some(Message::init(self, x, y)),
                     96 => Some(BigChest::init(self, x, y)),
                     118 => Some(Flag::init(self, x, y)),
                     _ => None,
@@ -410,7 +411,6 @@ impl Celeste {
                 }
                 j += 1;
             }
-            // dbg!(utils::min(15f32, x2 / 8f32));
             if i >= utils::min(15f32, x2 / 8f32) as u8 {
                 break;
             }
@@ -420,20 +420,6 @@ impl Celeste {
     }
 
     pub fn save_state(&mut self) -> Result<String, serde_json::Error> {
-        // let mut holders = vec![];
-        // for i in 0..self.objects.len() {
-        //     let o = &self.objects[i];
-        //     holders.push(o.borrow());
-        // }
-        //
-        // let refs: Vec<&Object> = holders.iter().map(|f| &**f).collect();
-        // // yes this is stupid.
-        //
-        // let json = json!({
-        //     "state": self,
-        //     "objects":refs,
-        // });
-        // Ok(json.to_string())
         serde_json::to_string(self)
     }
     pub fn load_state(&mut self, json: &str) {
