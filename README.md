@@ -6,6 +6,26 @@ inspired by ccleste and pyleste
 
 ported from [smalleste.p8](https://github.com/CelesteClassic/smalleste/blob/main/smalleste.p8)
 
+
+### how to use
+- [web demo](https://coolelectronics.me/rustic-demo)
+- [PC standalone](https://github.com/CoolElectronics/rustic-mountain/releases)
+
+to compile standalone:
+```
+git clone https://github.com/CoolElectronics/rustic-mountain
+cd rustic-mountain
+cargo build
+```
+
+to compile for web:
+```
+cargo install wasm-pack
+git clone https://github.com/CoolElectronics/rustic-mountain
+cd rustic-mountain/web
+wasm-pack build --target web
+```
+
 ### librustic
 a headless API is exposed through the "core" crate, so you can import it into any rust project, or compile to a shared object for FFI use in any programming language<br>
 this feature is used in [morespriteshorn](https://github.com/CoolElectronics/morespriteshorn) to simulate celeste physics inside of the love2d engine
