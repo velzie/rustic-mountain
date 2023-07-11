@@ -46,6 +46,7 @@ pub struct Celeste {
     pub start_game: bool,
     pub flash_bg: bool,
     pub new_bg: bool,
+    pub pause_player: bool,
 }
 
 impl Celeste {
@@ -99,7 +100,7 @@ impl Celeste {
             music_timer: 0,
             start_game_flash: 0.0,
             flash_bg: false,
-
+            pause_player: false,
             new_bg: false,
         };
         cel.title_screen();
@@ -239,7 +240,7 @@ impl Celeste {
                     cloud.y,
                     cloud.x + cloud.w,
                     cloud.y + 16 - (cloud.w as f32 * 0.1875) as i32,
-                    1,
+                    if self.new_bg { 14 } else { 1 },
                 );
                 if cloud.x > 128 {
                     cloud.x = -cloud.w;

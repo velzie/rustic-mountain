@@ -64,6 +64,9 @@ impl Player {
         }
     }
     pub fn update(obj: &mut Object, celeste: &mut Celeste) {
+        if celeste.pause_player {
+            return;
+        }
         let tref = match &mut obj.obj_type {
             ObjectType::Player(p) => p.clone(),
             _ => unreachable!(),

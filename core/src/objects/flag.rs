@@ -28,7 +28,9 @@ impl Flag {
                 score: celeste
                     .got_fruit
                     .iter()
-                    .fold(0, |acc, x| acc + if *x { 0 } else { 1 }),
+                    .map(|x| if *x { 0 } else { 1 })
+                    .sum(),
+                // .fold(0, |acc, x| acc +),
                 show: false,
             }))), // score =
             draw: ObjFunc(Self::draw),

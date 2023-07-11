@@ -5,6 +5,8 @@ use rand::Rng;
 use crate::{structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
+use super::orb::Orb;
+
 #[derive(Serialize, Deserialize)]
 pub struct BigChest {
     state: u8,
@@ -58,16 +60,10 @@ impl BigChest {
                 Some(i) => {
                     let jref = celeste.objects[i].clone();
                     let mut playerobj = jref.borrow_mut();
-                    let pref = match &mut playerobj.obj_type {
-                        ObjectType::Player(p) => p.clone(),
-                        _ => unreachable!(),
-                    };
-                    let _player = pref.borrow_mut();
-                    celeste.max_djump = 2;
                     if playerobj.is_solid(0.0, 1.0, celeste) {
                         // music -1 500 7
                         // sfx 37
-                        // pause_player = true
+                        celeste.pause_player = true;
                         playerobj.spd = Vector { x: 0.0, y: 0.0 };
                         this.state = 1;
                         obj.init_smoke(celeste, 0.0, 0.0);
@@ -86,7 +82,7 @@ impl BigChest {
         } else if this.state == 1 {
             this.timer -= 1.0;
             celeste.shake = 5;
-            // flash bg = true
+            celeste.flash_bg = true;
             if this.timer <= 45.0 && this.particles.len() < 50 {
                 this.particles.push(ChestParticle {
                     x: celeste.mem.rng.gen_range(1.0..15.0),
@@ -98,10 +94,15 @@ impl BigChest {
             if this.timer < 0.0 {
                 this.state = 2;
                 this.particles.clear();
-                // flash bg = false
-                // new bg = true
-                // init orb
-                // pause player = false
+                celeste.flash_bg = false;
+                celeste.new_bg = true;
+                let obj = Rc::new(RefCell::new(Orb::init(
+                    celeste,
+                    obj.pos.x + 4.0,
+                    obj.pos.y + 4.0,
+                )));
+                celeste.objects.push(obj);
+                celeste.pause_player = false;
             }
             for particle in &mut this.particles {
                 particle.y += particle.spd;

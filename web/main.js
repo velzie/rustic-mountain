@@ -207,6 +207,10 @@ window.onload = () => {
         if (canvas.getContext) {
             ctx = canvas.getContext("2d")
         }
+        document.getElementById("restart").addEventListener("click", () => {
+            // this will leak memory. too bad!
+            start(mapdata, sprites, flags, fontatlas)
+        });
         document.getElementById("savestate").addEventListener("click", () => {
             save_state();
         });

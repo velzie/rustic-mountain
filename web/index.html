@@ -8,11 +8,25 @@
 </head>
 
 <body>
-    <canvas id="canvas">
+    <div id="outer">
+        <h1 style="text-align: center;">Rustic Mountain Demo</h1>
+        <div id="container">
+            <canvas id="canvas">
 
-    </canvas><br>
-    <button id="savestate">Save State</button>
-    <button id="loadstate">Load State</button>
+            </canvas>
+            <div style="padding: 2em;">
+                <p>This is an attempted 1:1 port of celeste classic from pico-8 to rust, being run through webassembly.
+                </p>
+                <p>
+                    z+x and arrow keys to control (c won't work, intentionally), and "f" to skip to the next level
+                </p>
+
+                <button id="restart">Restart</button>
+                <button id="savestate">Save State</button>
+                <button id="loadstate">Load State</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
