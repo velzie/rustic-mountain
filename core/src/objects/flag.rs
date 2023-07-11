@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{structures::*, Celeste};
+use crate::{draw_time, structures::*, Celeste};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -50,6 +50,11 @@ impl Flag {
         if this.show {
             celeste.mem.rectfill(32, 2, 96, 31, 0);
             celeste.mem.spr(26, 55, 6, None);
+            celeste.mem.print(&format!("x{}", this.score), 64, 9, 7);
+            draw_time(celeste, 49, 16);
+            celeste
+                .mem
+                .print(&format!("deaths:{}", celeste.deaths), 48, 24, 7);
         } else if obj.check(celeste, "Player", 0.0, 0.0).is_some() {
             // sfx 55
             // sfx timer = 30

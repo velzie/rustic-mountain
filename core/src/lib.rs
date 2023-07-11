@@ -107,11 +107,11 @@ impl Celeste {
         cel
     }
 
-    // pub fn load_level();
     pub fn next_tick(&mut self) {
+        // summit
         self.frames += 1;
 
-        if self.level < 31 {
+        if self.level < 30 {
             self.seconds += self.frames / 30;
             self.minutes += (self.seconds / 60) as u64;
             self.seconds %= 60;

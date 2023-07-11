@@ -13,13 +13,6 @@ use crate::{
     Celeste,
 };
 
-// use crate::utils::log;
-
-macro_rules! log {
-    ($x:expr,$y:expr) => {
-        ($x.mem.logger)(&format!("{}", $y))
-    };
-}
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
