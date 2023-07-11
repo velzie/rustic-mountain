@@ -83,6 +83,9 @@ pub fn main() {
                     Keycode::Z => {
                         engine.mem.buttons[4] = true;
                     }
+                    Keycode::C => {
+                        engine.mem.buttons[4] = true;
+                    }
                     Keycode::X => {
                         engine.mem.buttons[5] = true;
                     }
