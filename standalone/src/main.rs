@@ -110,6 +110,9 @@ pub fn main() {
                     Keycode::Z => {
                         engine.mem.buttons[4] = false;
                     }
+                    Keycode::C => {
+                        engine.mem.buttons[4] = false;
+                    }
                     Keycode::X => {
                         engine.mem.buttons[5] = false;
                     }
