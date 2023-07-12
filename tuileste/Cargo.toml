@@ -1,0 +1,11 @@
+[package]
+name = "rustic-mountain-tui"
+version = "0.1.0"
+edition = "2021"
+workspace = "../"
+
+[dependencies]
+rustic-mountain-core = { path = "../core"}
+term_cursor = "0.2.1"
+termion = "1.5"
+tui = { version = "0.19", default-features = false, features = ['termion'] }
