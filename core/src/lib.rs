@@ -259,6 +259,12 @@ impl Celeste {
             4,
         );
 
+        for v in self.objects.clone() {
+            let mut r = v.borrow_mut();
+            if let ObjectType::Platform(_) = r.obj_type {
+                r.draw(self);
+            }
+        }
         self.mem.map(
             self.room.x as u8 * 16,
             self.room.y as u8 * 16,
@@ -270,7 +276,11 @@ impl Celeste {
         );
         for v in self.objects.clone() {
             // cloning is fine here, it's just a vector of pointers
-            v.borrow_mut().draw(self);
+            let mut r = v.borrow_mut();
+            if let ObjectType::Platform(_) = r.obj_type {
+            } else {
+                r.draw(self);
+            }
         }
 
         // do particles here
