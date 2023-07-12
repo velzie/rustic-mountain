@@ -26,6 +26,18 @@ cd rustic-mountain/web
 wasm-pack build --target web
 ```
 
+### tuileste
+![image](https://github.com/CoolElectronics/rustic-mountain/assets/58010778/ff23acd8-3b88-4642-abc5-71af126a3a77)
+this is an experimental port with to the linux terminal. to use it:
+```
+git clone https://github.com/CoolElectronics/rustic-mountain
+cd rustic-mountain/tuileste
+cargo run
+```
+the controls are extremely scuffed because of the limitations of terminals. use a modern terminal like kitty or konsole. pressing any of the arrow keys will hold them down for 10 frames, so you'll have to sort of press and unpress it every 10 frames if you want to hold it down. have fun
+
+as usual, z+x for jump and dash, arrow keys to move, f to skip level, 'q' to make a savestate, 'e' to load a savestate
+
 ### librustic
 a headless API is exposed through the "core" crate, so you can import it into any rust project, or compile to a shared object for FFI use in any programming language<br>
 this feature is used in [morespriteshorn](https://github.com/CoolElectronics/morespriteshorn) to simulate celeste physics inside of the love2d engine
