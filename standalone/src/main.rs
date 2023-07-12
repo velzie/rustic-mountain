@@ -120,10 +120,7 @@ pub fn main() {
                         engine.next_room();
                     }
                     Keycode::E => match engine.save_state() {
-                        Ok(e) => {
-                            println!("{}", e);
-                            savestate = Some(e)
-                        }
+                        Ok(e) => savestate = Some(e),
                         Err(e) => panic!("{:?}", e),
                     },
                     Keycode::Q => {

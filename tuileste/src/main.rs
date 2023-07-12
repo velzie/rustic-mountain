@@ -54,6 +54,8 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut events = stdin.events();
 
     write!(stdout, "{}", termion::clear::All)?;
+
+    let mut savestate: Option<String> = None;
     loop {
         engine.next_tick();
         engine.draw();
@@ -110,8 +112,23 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
                         timings[3] = key_duration;
                         engine.mem.buttons[3] = true;
                     }
+                    Key::Char('e') => match engine.save_state() {
+                        Ok(e) => savestate = Some(e),
+                        Err(e) => panic!("{:?}", e),
+                    },
 
+                    Key::Char('f') => {
+                        engine.next_room();
+                    }
+                    Key::Char('q') => {
+                        if let Some(s) = &savestate {
+                            engine.load_state(s);
+                        }
+                    }
                     Key::Char('z') => {
+                        engine.mem.buttons[4] = true;
+                    }
+                    Key::Char('c') => {
                         engine.mem.buttons[4] = true;
                     }
                     Key::Char('x') => {
