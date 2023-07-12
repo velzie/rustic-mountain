@@ -186,6 +186,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustic-mountain-lib"
+version = "0.1.0"
+dependencies = [
+ "rustic-mountain-core",
+]
+
+[[package]]
 name = "rustic-mountain-standalone"
 version = "0.1.0"
 dependencies = [

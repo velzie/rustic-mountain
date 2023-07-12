@@ -1,2 +1,2 @@
 [workspace]
-members = ["core", "standalone", "web","tuileste"]
+members = ["core", "standalone", "web","tuileste","librustic"]
