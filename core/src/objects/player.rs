@@ -167,10 +167,11 @@ impl Player {
             }
 
             if this.jbuffer > 0 {
-                if this.grace > 1 {
+                if this.grace > 0 {
                     this.jbuffer = 0;
                     this.grace = 0;
                     obj.spd.y = -2f32;
+                    obj.init_smoke(celeste, 0.0, 4.0)
                 } else {
                     let wall_dir = if obj.is_solid(-3f32, 0f32, celeste) {
                         -1f32
