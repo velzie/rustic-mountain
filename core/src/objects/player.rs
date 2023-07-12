@@ -282,8 +282,8 @@ impl Player {
         let mut i: f32 = 0.0;
         loop {
             celeste.dead_particles.push(DeadParticle {
-                x: obj.pos.x,
-                y: obj.pos.y,
+                x: obj.pos.x + 4.0,
+                y: obj.pos.y + 4.0,
                 t: 2.0,
                 dx: sin(i) * 3.0f32,
                 dy: cos(i) * 3.0f32,
