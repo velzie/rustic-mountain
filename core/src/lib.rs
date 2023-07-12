@@ -404,25 +404,25 @@ impl Celeste {
         );
     }
     pub fn spikes_at(&self, x1: f32, y1: f32, x2: f32, y2: f32, xspd: f32, yspd: f32) -> bool {
-        let mut i = 0f32.max(x1 / 8.0) as u8;
+        let mut i = 0f32.max((x1 / 8.0).floor()) as u8;
         loop {
-            let mut j = 0f32.max(y1 / 8.0) as u8;
+            let mut j = 0f32.max((y1 / 8.0).floor()) as u8;
             loop {
                 if match self.tile_at(i as f32, j as f32) {
-                    17 => yspd >= 0.0 && y2 % 8.0 >= 6.0,
-                    27 => yspd <= 0.0 && y1 % 8.0 <= 2.0,
-                    43 => xspd <= 0.0 && x1 % 8.0 <= 2.0,
-                    59 => xspd >= 0.0 && x2 % 8.0 >= 6.0,
+                    17 => yspd >= 0.0 && y2.rem_euclid(8.0) >= 6.0,
+                    27 => yspd <= 0.0 && y1.rem_euclid(8.0) <= 2.0,
+                    43 => xspd <= 0.0 && x1.rem_euclid(8.0) <= 2.0,
+                    59 => xspd >= 0.0 && x2.rem_euclid(8.0) >= 6.0,
                     _ => false,
                 } {
                     return true;
                 }
-                if j >= 15f32.min(y2 / 8.0) as u8 {
+                if j >= 15f32.min((y2 / 8.0).floor()) as u8 {
                     break;
                 }
                 j += 1;
             }
-            if i >= utils::min(15f32, x2 / 8f32) as u8 {
+            if i >= utils::min(15f32, (x2 / 8f32).floor()) as u8 {
                 break;
             }
             i += 1;

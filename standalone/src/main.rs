@@ -139,7 +139,10 @@ pub fn main() {
 
         engine.next_tick();
         engine.draw();
-
+        // let graph = &mut engine.mem.graphics;
+        // for i in 0..128 * 128 {
+        //     graph[i as usize] = (i % 10) as u8;
+        // }
         for (i, col) in engine.mem.graphics.iter().enumerate() {
             canvas.set_draw_color(pallete[*col as usize]);
             canvas

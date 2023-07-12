@@ -194,9 +194,6 @@ impl Player {
                 }
             }
 
-            if obj.pos.y < -4.0 {
-                celeste.next_room();
-            }
             let d_full = 5.0;
             let d_half = 3.5355339059;
             if this.djump > 0 && dash {
@@ -265,6 +262,9 @@ impl Player {
                 }
             }
         };
+        if obj.pos.y < -4.0 {
+            celeste.next_room();
+        }
         this.was_on_ground = on_ground;
     }
     pub fn draw(obj: &mut Object, celeste: &mut Celeste) {
