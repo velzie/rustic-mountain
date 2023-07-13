@@ -5,7 +5,7 @@ edition = "2021"
 workspace = "../"
 
 [lib]
-crate-type = ["cdylib"]   
+crate-type = ["dylib"]   
 
 [dependencies]
 rustic-mountain-core = { path = "../core"}

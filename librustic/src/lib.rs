@@ -28,6 +28,7 @@ pub extern "C" fn librustic_start(
             CStr::from_ptr(flags).to_string_lossy().to_string(),
             CStr::from_ptr(fontatlas).to_string_lossy().to_string(),
         )));
+        (*CELESTE).load_room(0, 0);
     }
 }
 
@@ -71,8 +72,7 @@ pub extern "C" fn librustic_render_screen() -> *mut c_void {
     unsafe {
         (*CELESTE).draw();
         let vec = (*CELESTE).mem.graphics.clone();
-        let boxed = vec.into_boxed_slice();
-        Box::into_raw(boxed) as *mut c_void
+        Box::into_raw(vec.into_boxed_slice()) as *mut c_void
     }
 }
 #[no_mangle]
