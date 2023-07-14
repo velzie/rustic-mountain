@@ -10,7 +10,8 @@ public class RusticFFI {
     native static void start();
 
 
-    native static byte[] tick_screen();
+    native static byte[] draw_screen();
+    native static void game_tick();
     native static void set_btn(int btn,boolean val);
 
 }

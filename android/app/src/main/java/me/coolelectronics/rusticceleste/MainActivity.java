@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         // its view to our relative layout.
         PaintView paintView = new PaintView(this);
         relativeLayout.addView(paintView);
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE

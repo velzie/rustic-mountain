@@ -59,8 +59,7 @@ Java_me_coolelectronics_rusticceleste_RusticFFI_start(JNIEnv *env, jclass clazz)
 }
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_me_coolelectronics_rusticceleste_RusticFFI_tick_1screen(JNIEnv *env, jclass clazz) {
-    (*librustic_next_tick)();
+Java_me_coolelectronics_rusticceleste_RusticFFI_draw_1screen(JNIEnv *env, jclass clazz) {
     unsigned char* arr = (*librustic_render_screen)();
 
 
@@ -89,5 +88,11 @@ JNIEXPORT void JNICALL
 Java_me_coolelectronics_rusticceleste_RusticFFI_set_1btn(JNIEnv *env, jclass clazz, jint btn,
                                                          jboolean val) {
     (*librustic_set_btn)(btn,val);
+
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_me_coolelectronics_rusticceleste_RusticFFI_game_1tick(JNIEnv *env, jclass clazz) {
+    (*librustic_next_tick)();
 
 }

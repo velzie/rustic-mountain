@@ -1,4 +1,6 @@
 /target
+a.out
+androidbackup/
 # Gradle files
 .gradle/
 build/

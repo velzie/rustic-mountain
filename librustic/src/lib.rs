@@ -28,13 +28,7 @@ pub extern "C" fn librustic_start(
             CStr::from_ptr(flags).to_string_lossy().to_string(),
             CStr::from_ptr(fontatlas).to_string_lossy().to_string(),
         )));
-        (*CELESTE).load_room(0, 0);
     }
-}
-
-#[no_mangle]
-pub extern "C" fn librustic_test() -> u8 {
-    42
 }
 
 #[no_mangle]
@@ -85,7 +79,6 @@ pub extern "C" fn librustic_skip_level() {
 #[no_mangle]
 pub extern "C" fn librustic_set_btn(btn: u8, val: bool) {
     unsafe {
-        // log(&format!("btn {} set to {}", btn, val));
         (*CELESTE).mem.buttons[btn as usize] = val;
     }
 }

@@ -1,13 +1,12 @@
 package me.coolelectronics.rusticceleste;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,6 +21,9 @@ public class PaintView extends View {
     Rect dashbutton;
 
     Rect joystickrect;
+    int joyptr = -1;
+
+    long lasttime   =System.currentTimeMillis();
     @SuppressLint("ResourceAsColor")
     public PaintView(Context context) {
         super(context);
@@ -44,7 +46,7 @@ public class PaintView extends View {
         outerPaint.setStyle(Paint.Style.FILL);
 
         // on below line we are setting color to it.
-        outerPaint.setColor(getResources().getColor(R.color.purple_200));
+        outerPaint.setColor(getResources().getColor(R.color.black));
 
 //        // on below line we are creating a display metrics
 //        DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -70,23 +72,38 @@ public class PaintView extends View {
 //    }
 
 
+    final long target_fps = 30;
+    final long interval = 1000/target_fps;
+
+    int joyx = -1;
+    int joyy = -1;
+
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+
+        long time = System.currentTimeMillis();
+        long elapsedmillis = time-lasttime;
+
+
+        // cap fps to 30
+        while (elapsedmillis < interval){
+            SystemClock.sleep(interval-elapsedmillis);
+            time = System.currentTimeMillis();
+            elapsedmillis = time-lasttime;
+        }
+        lasttime = time;
+        RusticFFI.game_tick();
+
         int width = getWidth();
         int height = getHeight();
         int largestsize = height/128;
 
-        // below four lines of code is use to add
-        // back color to our screen which is green
+
         canvas.drawPaint(outerPaint);
 
-        // on below line we are setting color to our paint.
-        otherPaint.setColor(Color.WHITE);
-
-        // on below line we are setting style to out paint.
         otherPaint.setStyle(Paint.Style.FILL);
 
         int[][] pal = {
@@ -108,7 +125,9 @@ public class PaintView extends View {
         {255, 204, 170},
         };
 
-        byte[] screen = RusticFFI.tick_screen();
+
+        byte[] screen = RusticFFI.draw_screen();
+
 
         int scale = largestsize;
 
@@ -120,7 +139,6 @@ public class PaintView extends View {
             int x = i % 128 * scale;
             int y = i / 128 * scale;
 
-//            Log.e("t", String.valueOf(screen.length));
             int[] c = pal[screen[i]];
             otherPaint.setColor(Color.rgb(c[0],c[1],c[2]));
             canvas.drawRect(
@@ -130,8 +148,7 @@ public class PaintView extends View {
                     starty + y+scale, otherPaint);
         }
 
-        // on below line we are changing the color for our paint.
-        otherPaint.setColor(getResources().getColor(R.color.teal_200));
+        otherPaint.setColor(Color.rgb(45,45,45));
 
         int celendx = startx + 128*scale;
 
@@ -145,10 +162,20 @@ public class PaintView extends View {
 //        buttony -= buttonwidth*1;
         dashbutton = new Rect(buttonstart,buttony-buttonwidth,buttonstart + buttonwidth,buttony);
 
+
+
+        int joystart = startx - (int)(buttonwidth * 2.5);
+
+        joystickrect = new Rect(joystart,buttony-(buttonwidth*2),joystart + buttonwidth*2,buttony);
+
+
         canvas.drawRect(jumpbutton,otherPaint);
         canvas.drawRect(dashbutton,otherPaint);
-//
-//        canvas.drawRect(joystickrect,otherPaint);
+        canvas.drawRect(joystickrect,otherPaint);
+        if (joyx != -1){
+            otherPaint.setColor(Color.rgb(65,65,65));
+            canvas.drawRect(joyx-buttonwidth/4,joyy-buttonwidth/4,joyx+buttonwidth/2,joyy+buttonwidth/2,otherPaint);
+        }
 
 
         invalidate();
@@ -162,25 +189,65 @@ public class PaintView extends View {
         // Let the ScaleGestureDetector inspect all events.
 //        mScaleDetector.onTouchEvent(ev);
 
-        final int action = ev.getAction();
-        Log.e("t", String.valueOf(action & 255));
+        final int action = (ev.getAction() & MotionEvent.ACTION_MASK);
 
-        if ((ev.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
-            if (inRect(jumpbutton, (int) ev.getX(), (int) ev.getY()))
-                RusticFFI.set_btn(4,true);
-            if (inRect(dashbutton, (int) ev.getX(), (int) ev.getY()))
-                RusticFFI.set_btn(5,true);
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_BUTTON_PRESS || action == MotionEvent.ACTION_MOVE || action == MotionEvent.ACTION_POINTER_UP) {
+
+                int x = (int) ev.getX(ev.getActionIndex());
+                int y = (int) ev.getY(ev.getActionIndex());
+                if (inRect(jumpbutton, x, y)) {
+                    RusticFFI.set_btn(4, true);
+                }
+                if (inRect(dashbutton, x, y))
+                    RusticFFI.set_btn(5,true);
+                if (inRect(joystickrect,x,y) || ev.getPointerId(ev.getActionIndex()) == joyptr){
+                    joyx = x;
+                    joyy = y;
+                    joyptr = ev.getPointerId(ev.getActionIndex());
+                    int midx = joystickrect.centerX();
+                    int w = joystickrect.width();
+                    int midy = joystickrect.centerY();
+                    int h = joystickrect.height();
+                    if (x>midx + w/6){
+                        RusticFFI.set_btn(1,true);
+                    }else{
+                        RusticFFI.set_btn(1,false);
+                    }
+                    if (x<midx - w/6){
+                        RusticFFI.set_btn(0,true);
+                    }else{
+                        RusticFFI.set_btn(0,false);
+                    }
+                    if (y>midy + h/6){
+                        RusticFFI.set_btn(3,true);
+                    }else{
+                        RusticFFI.set_btn(3,false);
+                    }
+                    if (y<midy - h/6){
+                        RusticFFI.set_btn(2,true);
+                    }else{
+                        RusticFFI.set_btn(2,false);
+                    }
+                }
+
+
         }
-        if ((ev.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-            RusticFFI.set_btn(4,false);
-            RusticFFI.set_btn(5,false);
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) {
+//            Log.e(":::", String.valueOf(ev.findPointerIndex(0)));
+            if (ev.getPointerId(ev.getActionIndex()) == joyptr) {
+                joyptr = -1;
+                joyx = -1;
+                RusticFFI.set_btn(0,false);
+                RusticFFI.set_btn(1,false);
+                RusticFFI.set_btn(2,false);
+                RusticFFI.set_btn(3,false);
+            }else{
+
+                RusticFFI.set_btn(4,false);
+                RusticFFI.set_btn(5,false);
+            }
         }
-//        if (ev.getX() > 300){
-//            RusticFFI.set_btn(1,true);
-//
-//        }else{
-//            RusticFFI.set_btn(1,false);
-//        }
+
 
         return true;
     }
