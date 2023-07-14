@@ -196,10 +196,10 @@ public class PaintView extends View {
                 int x = (int) ev.getX(ev.getActionIndex());
                 int y = (int) ev.getY(ev.getActionIndex());
                 if (inRect(jumpbutton, x, y)) {
-                    RusticFFI.set_btn(4, true);
+                    RusticFFI.set_btn(5, true);
                 }
                 if (inRect(dashbutton, x, y))
-                    RusticFFI.set_btn(5,true);
+                    RusticFFI.set_btn(4,true);
                 if (inRect(joystickrect,x,y) || ev.getPointerId(ev.getActionIndex()) == joyptr){
                     joyx = x;
                     joyy = y;
