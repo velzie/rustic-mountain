@@ -1,6 +1,7 @@
 /target
 a.out
 androidbackup/
+librustic_mountain_lib.so 
 # Gradle files
 .gradle/
 build/

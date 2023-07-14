@@ -10,6 +10,7 @@ ported from [smalleste.p8](https://github.com/CelesteClassic/smalleste/blob/main
 ### how to use
 - [web demo](https://coolelectronics.me/rustic-demo)
 - [PC standalone](https://github.com/CoolElectronics/rustic-mountain/releases)
+- [Android APK](https://github.com/CoolElectronics/rustic-mountain/releases)
 
 to compile standalone:
 ```
@@ -25,6 +26,19 @@ git clone https://github.com/CoolElectronics/rustic-mountain
 cd rustic-mountain/web
 wasm-pack build --target web
 ```
+to compile for android:
+```
+cargo install cross
+git clone https://github.com/CoolElectronics/rustic-mountain
+cd rustic-mountain/librustic
+cross build --target aarch64-linux-android --release
+cp ../target/aarch64-linux-android/release/librustic_mountain_lib.so ../android/app/libs/arm64-v8a/
+cp ../target/aarch64-linux-android/release/librustic_mountain_lib.so ../android/app/libs/armeabi/
+cp ../target/aarch64-linux-android/release/librustic_mountain_lib.so ../android/app/libs/jniLibs/
+
+# open android studio and build normally, or do it with gradle idk
+```
+
 
 ### tuileste
 ![image](https://github.com/CoolElectronics/rustic-mountain/assets/58010778/ff23acd8-3b88-4642-abc5-71af126a3a77)
