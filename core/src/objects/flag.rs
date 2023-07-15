@@ -28,7 +28,7 @@ impl Flag {
                 score: celeste
                     .got_fruit
                     .iter()
-                    .map(|x| if *x { 0 } else { 1 })
+                    .map(|x| if *x { 1 } else { 0 })
                     .sum(),
                 // .fold(0, |acc, x| acc +),
                 show: false,
