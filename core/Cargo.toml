@@ -9,15 +9,14 @@ repository = "https://github.com/CoolElectronics/rustic-mountain"
 documentation = "https://github.com/CoolElectronics/rustic-mountain/blob/main/core/README.md"
 edition = "2021"
 workspace = "../"
-license = "GPL3"
+license = "GPL-3.0-or-later"
 
 [dependencies]
-hex = "*"
-lazy_static= "*"
-rand = {version= "*",features=["serde"]}
-getrandom = {version = "*", features = ["js"]}
-serde = {version = "*", features=["derive","rc"]}
-serde_json = "*"
+rand = {version= "0.8.5",features=["serde"]}
+getrandom = {version = "0.2.10", features = ["js"]}
+serde = {version = "1.0.174", features=["derive","rc"]}
+serde_json = "1.0.103"
+hex = "0.4.3"
 
 [lib]
 name = "rustic_mountain_core"
