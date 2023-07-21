@@ -21,7 +21,9 @@ use structures::*;
 use rand::prelude::*;
 use utils::{max, sin};
 #[derive(Serialize, Deserialize)]
+
 pub struct Celeste {
+    /// Represents the pico-8 display buffers and memory. Go through this for any drawing
     pub mem: Memory,
     // #[serde(skip)]
     pub objects: Vec<Rc<RefCell<Object>>>,
@@ -48,8 +50,20 @@ pub struct Celeste {
     pub new_bg: bool,
     pub pause_player: bool,
 }
-
 impl Celeste {
+    /// Returns a new celeste object
+    /// # Arguments
+    ///
+    /// * `map` - A string containing the "mapdata" section of a pico-8 cart
+    /// * `sprites` - A string containing the "sprites" section of the pico-8 cart
+    /// * `flags` - A string containing the "flags" section of the pico-8 carts
+    /// * `fontatlas` - A string with the bitmap data of the pico-8 font
+    ///
+    /// # Examples
+    /// ```
+    /// // see https://github.com/CoolElectronics/rustic-mountain/blob/main/standalone/src/consts.rs for example values of these constants
+    /// let celeste = Celeste::new(MAPDATA,SPRITES,FLAGS,FONTATLAS);
+    /// ```
     pub fn new(map: String, sprites: String, flags: String, fontatlas: String) -> Celeste {
         // let v: Box<dyn Fn(&mut Celeste) -> Box<dyn Object>> =
         //     ;
@@ -108,6 +122,8 @@ impl Celeste {
         cel
     }
 
+    /// Advances a game tick. Does not draw the screen buffer. Analagous to calling `_update()` in
+    /// the original pico-8 cart. Should be called 30 times a second for real-time gameplay
     pub fn next_tick(&mut self) {
         // summit
         self.frames += 1;
@@ -327,6 +343,7 @@ impl Celeste {
 
         // todo: summit blinds
     }
+    /// advances to the next room
     pub fn next_room(&mut self) {
         // do sound at some point
         self.level += 1;
@@ -430,9 +447,20 @@ impl Celeste {
         return false;
     }
 
+    /// returns a savestate in JSON format, as a string
+    /// ```
+    /// let savestate = celeste.save_state();
+    /// celeste.load_state(savestate)
+    /// ```
     pub fn save_state(&mut self) -> Result<String, serde_json::Error> {
         serde_json::to_string(self)
     }
+
+    /// loads a savestate in JSON format, as a string slice
+    /// ```
+    /// let savestate = celeste.save_state();
+    /// celeste.load_state(savestate)
+    /// ```
     pub fn load_state(&mut self, json: &str) {
         let deserialized: Self = serde_json::from_str(json).unwrap();
         for i in 0..deserialized.objects.len() {

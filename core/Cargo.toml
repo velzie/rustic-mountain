@@ -1,8 +1,16 @@
 [package]
 name = "rustic-mountain-core"
 version = "0.1.0"
+authors = ["coolelectronics <me@coolelectronics.me>"]
+description = "A rust library for emulating the physics and graphics of the 2015 game jam release of Celeste Classic"
+readme = "README.md"
+homepage = "https://github.com/CoolElectronics/rustic-mountain"
+repository = "https://github.com/CoolElectronics/rustic-mountain"
+documentation = "https://github.com/CoolElectronics/rustic-mountain/blob/main/core/README.md"
 edition = "2021"
 workspace = "../"
+license = "GPL3"
+
 [dependencies]
 hex = "*"
 lazy_static= "*"
@@ -10,3 +18,7 @@ rand = {version= "*",features=["serde"]}
 getrandom = {version = "*", features = ["js"]}
 serde = {version = "*", features=["derive","rc"]}
 serde_json = "*"
+
+[lib]
+name = "rustic_mountain_core"
+path = "src/lib.rs"
