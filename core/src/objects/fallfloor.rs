@@ -92,7 +92,7 @@ impl FallFloor {
             self.state = 1;
             self.delay = 15;
             obj.init_smoke(celeste, 0.0, 0.0);
-            let springdex = obj.check(celeste, "Spring", 0.0, 0.0);
+            let springdex = obj.check(celeste, "Spring", 0.0, -1.0);
             match springdex {
                 Some(i) => {
                     let jref = celeste.objects[i].clone();
