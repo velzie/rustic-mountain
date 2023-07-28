@@ -2,7 +2,7 @@ the pico-8 classic you all know and love, now with fearless concurrency
 
 Rustic Mountain
 ===============
-[<img alt="github" src="https://img.shields.io/badge/github-dtolnay/syn-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/CoolElectronics/rustic-mountain)
+[<img alt="github" src="https://img.shields.io/badge/github-coolelectronics/rustic-mountain?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/CoolElectronics/rustic-mountain)
 [<img alt="crates.io" src="https://img.shields.io/crates/v/rustic-mountain-core.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/rustic-mountain-core)
 
 A reimplementation of Celeste Classic in rust, with ports to windows and linux, android and the web
