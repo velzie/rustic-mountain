@@ -6,11 +6,13 @@ Rustic Mountain
 [<img alt="crates.io" src="https://img.shields.io/crates/v/rustic-mountain-core.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/rustic-mountain-core)
 
 A reimplementation of Celeste Classic in rust, with ports to windows and linux, android and the web
-### how to use
+### official ports
 - [web demo](https://coolelectronics.me/rustic-demo)
 - [PC standalone](https://github.com/CoolElectronics/rustic-mountain/releases)
 - [Android APK](https://github.com/CoolElectronics/rustic-mountain/releases)
 - [crates.io package](https://crates.io/crates/rustic-mountain-core)
+### other ports
+- [Apple Watch project](https://github.com/r58Playz/watchleste)
 
 to compile standalone:
 ```
